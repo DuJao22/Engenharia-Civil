@@ -1,0 +1,181 @@
+{% extends "base.html" %}
+
+{% block title %}{{ project.name }} - Sistema de Engenharia Civil{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>{{ project.name }}</h2>
+            <div>
+                <span class="badge bg-{% if project.status == 'planejamento' %}warning{% elif project.status == 'execucao' %}primary{% elif project.status == 'concluido' %}success{% else %}secondary{% endif %} me-2">
+                    {{ project.status.title() }}
+                </span>
+                <a href="{{ url_for('edit_project', id=project.id) }}" class="btn btn-outline-primary btn-sm">
+                    <i class="fas fa-edit me-1"></i>Editar
+                </a>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Informações do Projeto -->
+            <div class="col-lg-4">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Informações</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <strong>Cliente:</strong><br>
+                            {{ project.client_name }}
+                            {% if project.client_email %}
+                                <br><small class="text-muted">{{ project.client_email }}</small>
+                            {% endif %}
+                            {% if project.client_phone %}
+                                <br><small class="text-muted">{{ project.client_phone }}</small>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <strong>Responsável Técnico:</strong><br>
+                            {{ project.technical_responsible }}
+                            {% if project.crea_number %}
+                                <br><small class="text-muted">CREA: {{ project.crea_number }}</small>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <strong>Período:</strong><br>
+                            {{ project.start_date.strftime('%d/%m/%Y') }} - {{ project.end_date.strftime('%d/%m/%Y') }}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <strong>Endereço:</strong><br>
+                            {{ project.address }}
+                        </div>
+                        
+                        {% if project.description %}
+                        <div>
+                            <strong>Descrição:</strong><br>
+                            <p class="text-muted">{{ project.description }}</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Orçamentos -->
+            <div class="col-lg-4">
+                <div class="card mb-4">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="fas fa-calculator me-2"></i>Orçamentos</h5>
+                        <a href="{{ url_for('new_budget', id=project.id) }}" class="btn btn-primary btn-sm">
+                            <i class="fas fa-plus me-1"></i>Novo
+                        </a>
+                    </div>
+                    <div class="card-body">
+                        {% if budgets %}
+                            {% for budget in budgets %}
+                            <div class="d-flex justify-content-between align-items-center border-bottom py-2">
+                                <div>
+                                    <strong>{{ budget.name }}</strong>
+                                    <br><small class="text-muted">v{{ budget.version }} - {{ budget.status.title() }}</small>
+                                </div>
+                                <div class="text-end">
+                                    <div class="fw-bold">R$ {{ "%.2f"|format(budget.total_cost) }}</div>
+                                    <a href="{{ url_for('budget_detail', project_id=project.id, budget_id=budget.id) }}" class="btn btn-outline-primary btn-sm">
+                                        Ver
+                                    </a>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <p class="text-muted text-center">Nenhum orçamento criado</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cronogramas -->
+            <div class="col-lg-4">
+                <div class="card mb-4">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="fas fa-clock me-2"></i>Cronogramas</h5>
+                        <a href="{{ url_for('new_schedule', project_id=project.id) }}" class="btn btn-primary btn-sm">
+                            <i class="fas fa-plus me-1"></i>Novo
+                        </a>
+                    </div>
+                    <div class="card-body">
+                        {% if schedules %}
+                            {% for schedule in schedules %}
+                            <div class="d-flex justify-content-between align-items-center border-bottom py-2">
+                                <div>
+                                    <strong>{{ schedule.name }}</strong>
+                                    <br><small class="text-muted">v{{ schedule.version }}</small>
+                                </div>
+                                <div class="text-end">
+                                    {% if schedule.total_duration %}
+                                        <div class="fw-bold">{{ schedule.total_duration }} dias</div>
+                                    {% endif %}
+                                    <a href="{{ url_for('schedule_detail', project_id=project.id, schedule_id=schedule.id) }}" class="btn btn-outline-primary btn-sm">
+                                        Ver
+                                    </a>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <p class="text-muted text-center">Nenhum cronograma criado</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cálculos do Projeto -->
+        {% if project.calculations %}
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-cogs me-2"></i>Cálculos Vinculados</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Nome</th>
+                                <th>Módulo</th>
+                                <th>Data</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for calc in project.calculations %}
+                            <tr>
+                                <td>{{ calc.name }}</td>
+                                <td>
+                                    <span class="badge bg-secondary">{{ calc.module.title() }}</span>
+                                </td>
+                                <td>{{ calc.created_at.strftime('%d/%m/%Y %H:%M') }}</td>
+                                <td>
+                                    <button class="btn btn-outline-primary btn-sm" onclick="viewCalculation({{ calc.id }})">
+                                        <i class="fas fa-eye me-1"></i>Ver
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+function viewCalculation(calcId) {
+    // Implementar modal para exibir detalhes do cálculo
+    alert('Funcionalidade em desenvolvimento');
+}
+</script>
+{% endblock %}

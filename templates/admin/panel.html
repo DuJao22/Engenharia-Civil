@@ -1,0 +1,318 @@
+{% extends "base.html" %}
+
+{% block title %}Painel Administrativo - Sistema de Engenharia Civil{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1><i class="fas fa-cogs me-2"></i>Painel Administrativo</h1>
+            <span class="badge bg-danger">Área Restrita</span>
+        </div>
+    </div>
+</div>
+
+<!-- Estatísticas Gerais -->
+<div class="row mb-4">
+    <div class="col-lg-3 col-md-6 mb-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4 class="mb-0">{{ stats.total_users }}</h4>
+                        <p class="mb-0">Total de Usuários</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-users fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer bg-primary-dark">
+                <small>{{ stats.active_users }} ativos</small>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-3 col-md-6 mb-3">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4 class="mb-0">{{ stats.total_projects }}</h4>
+                        <p class="mb-0">Total de Projetos</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-project-diagram fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer bg-success-dark">
+                <small>{{ stats.projects_status.ativo }} ativos</small>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-3 col-md-6 mb-3">
+        <div class="card bg-info text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4 class="mb-0">{{ stats.total_calculations }}</h4>
+                        <p class="mb-0">Total de Cálculos</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-calculator fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer bg-info-dark">
+                <small>Todos os módulos</small>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-3 col-md-6 mb-3">
+        <div class="card bg-warning text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4 class="mb-0">{{ stats.users_by_plan.pro }}</h4>
+                        <p class="mb-0">Usuários Pro</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-crown fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer bg-warning-dark">
+                <small>{{ stats.users_by_plan.free }} gratuitos</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Gráficos -->
+<div class="row mb-4">
+    <div class="col-lg-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-chart-pie me-2"></i>Usuários por Tipo</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="usersRoleChart" height="300"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-chart-bar me-2"></i>Status dos Projetos</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="projectsStatusChart" height="300"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Atividade Recente -->
+<div class="row">
+    <div class="col-lg-6 mb-4">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between">
+                <h5 class="mb-0"><i class="fas fa-user-plus me-2"></i>Usuários Recentes</h5>
+                <a href="{{ url_for('admin_users') }}" class="btn btn-sm btn-outline-primary">Ver Todos</a>
+            </div>
+            <div class="card-body">
+                {% if recent_users %}
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Nome</th>
+                                <th>Email</th>
+                                <th>Tipo</th>
+                                <th>Criado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for user in recent_users %}
+                            <tr>
+                                <td>{{ user.name }}</td>
+                                <td>{{ user.email }}</td>
+                                <td>
+                                    <span class="badge bg-secondary">{{ user.role.title() }}</span>
+                                </td>
+                                <td>{{ user.created_at.strftime('%d/%m/%Y') }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p class="text-muted">Nenhum usuário cadastrado.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-project-diagram me-2"></i>Projetos Recentes</h5>
+            </div>
+            <div class="card-body">
+                {% if recent_projects %}
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Nome</th>
+                                <th>Cliente</th>
+                                <th>Status</th>
+                                <th>Criado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for project in recent_projects %}
+                            <tr>
+                                <td>{{ project.name }}</td>
+                                <td>{{ project.client_name }}</td>
+                                <td>
+                                    <span class="badge bg-{% if project.status == 'ativo' %}success{% elif project.status == 'concluido' %}primary{% else %}secondary{% endif %}">
+                                        {{ project.status.title() }}
+                                    </span>
+                                </td>
+                                <td>{{ project.created_at.strftime('%d/%m/%Y') }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p class="text-muted">Nenhum projeto criado.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Ações Rápidas -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-bolt me-2"></i>Ações Rápidas</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6 col-lg-3 mb-2">
+                        <a href="{{ url_for('admin_users') }}" class="btn btn-outline-primary w-100">
+                            <i class="fas fa-users me-1"></i>Gerenciar Usuários
+                        </a>
+                    </div>
+                    <div class="col-md-6 col-lg-3 mb-2">
+                        <button class="btn btn-outline-success w-100" onclick="showSystemInfo()">
+                            <i class="fas fa-info-circle me-1"></i>Info do Sistema
+                        </button>
+                    </div>
+                    <div class="col-md-6 col-lg-3 mb-2">
+                        <button class="btn btn-outline-warning w-100" onclick="alert('Funcionalidade em desenvolvimento')">
+                            <i class="fas fa-cog me-1"></i>Configurações
+                        </button>
+                    </div>
+                    <div class="col-md-6 col-lg-3 mb-2">
+                        <button class="btn btn-outline-info w-100" onclick="alert('Funcionalidade em desenvolvimento')">
+                            <i class="fas fa-download me-1"></i>Export Dados
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+// Dados para os gráficos
+const usersRoleData = {{ stats.users_by_role | tojson }};
+const projectsStatusData = {{ stats.projects_status | tojson }};
+
+// Gráfico de Usuários por Tipo
+const usersRoleCtx = document.getElementById('usersRoleChart').getContext('2d');
+const usersRoleChart = new Chart(usersRoleCtx, {
+    type: 'doughnut',
+    data: {
+        labels: ['Administradores', 'Engenheiros', 'Clientes'],
+        datasets: [{
+            data: [usersRoleData.admin, usersRoleData.engineer, usersRoleData.client],
+            backgroundColor: ['#e74c3c', '#3498db', '#2ecc71'],
+            borderWidth: 2,
+            borderColor: '#ffffff'
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                position: 'bottom'
+            }
+        }
+    }
+});
+
+// Gráfico de Status dos Projetos  
+const projectsStatusCtx = document.getElementById('projectsStatusChart').getContext('2d');
+const projectsStatusChart = new Chart(projectsStatusCtx, {
+    type: 'bar',
+    data: {
+        labels: ['Planejamento', 'Ativo', 'Pausado', 'Concluído'],
+        datasets: [{
+            label: 'Projetos',
+            data: [
+                projectsStatusData.planejamento,
+                projectsStatusData.ativo, 
+                projectsStatusData.pausado,
+                projectsStatusData.concluido
+            ],
+            backgroundColor: ['#f39c12', '#2ecc71', '#e67e22', '#3498db'],
+            borderColor: ['#e67e22', '#27ae60', '#d35400', '#2980b9'],
+            borderWidth: 1
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                display: false
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    stepSize: 1
+                }
+            }
+        }
+    }
+});
+
+function showSystemInfo() {
+    alert(`Sistema de Engenharia Civil - João Layon
+    
+Versão: 2.0
+Total de Usuários: {{ stats.total_users }}
+Total de Projetos: {{ stats.total_projects }}
+Total de Cálculos: {{ stats.total_calculations }}
+
+Desenvolvido por: João Layon`);
+}
+</script>
+{% endblock %}

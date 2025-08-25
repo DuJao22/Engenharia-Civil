@@ -1,0 +1,659 @@
+Geotecnia / Mecânica dos Solos
+
+Capacidade de carga de sapata (Terzaghi):
+
+𝑞
+𝑢
+𝑙
+𝑡
+=
+𝑐
+𝑁
+𝑐
++
+𝛾
+𝐷
+𝑓
+𝑁
+𝑞
++
+0.5
+𝛾
+𝐵
+𝑁
+𝛾
+q
+ult
+	​
+
+=cN
+c
+	​
+
++γD
+f
+	​
+
+N
+q
+	​
+
++0.5γBN
+γ
+	​
+
+
+Onde 
+𝑐
+c = coesão, 
+𝛾
+γ = peso específico do solo, 
+𝐷
+𝑓
+D
+f
+	​
+
+ = profundidade da fundação, 
+𝐵
+B = largura da sapata, 
+𝑁
+𝑐
+,
+𝑁
+𝑞
+,
+𝑁
+𝛾
+N
+c
+	​
+
+,N
+q
+	​
+
+,N
+γ
+	​
+
+ = fatores de capacidade de carga.
+
+Empuxo ativo de terra (Rankine):
+
+𝐸
+𝑎
+=
+1
+2
+𝛾
+𝐻
+2
+𝐾
+𝑎
+E
+a
+	​
+
+=
+2
+1
+	​
+
+γH
+2
+K
+a
+	​
+
+𝐾
+𝑎
+=
+tan
+⁡
+2
+(
+45
+∘
+−
+𝜙
+2
+)
+K
+a
+	​
+
+=tan
+2
+(45
+∘
+−
+2
+ϕ
+	​
+
+)
+
+Empuxo passivo de terra:
+
+𝐾
+𝑝
+=
+tan
+⁡
+2
+(
+45
+∘
++
+𝜙
+2
+)
+K
+p
+	​
+
+=tan
+2
+(45
+∘
++
+2
+ϕ
+	​
+
+)
+
+Adensamento de Terzaghi (recalque de solos):
+
+𝑆
+=
+Δ
+𝐻
+𝐻
+0
+=
+𝐶
+𝑣
+𝑡
+𝐻
+2
+S=
+H
+0
+	​
+
+ΔH
+	​
+
+=
+H
+2
+C
+v
+	​
+
+t
+	​
+
+
+Onde 
+𝐶
+𝑣
+C
+v
+	​
+
+ = coeficiente de adensamento, 
+𝑡
+t = tempo, 
+𝐻
+H = altura da camada de solo.
+
+2️⃣ Pavimentação
+
+Espessura de pavimento flexível (Método CBR):
+
+𝐻
+=
+𝐾
+⋅
+(
+𝑊
+)
+0.25
+⋅
+𝐶
+𝐵
+𝑅
+−
+0.25
+H=K⋅(W)
+0.25
+⋅CBR
+−0.25
+
+Onde 
+𝐻
+H = espessura total, 
+𝑊
+W = carga equivalente de tráfego, 
+𝐶
+𝐵
+𝑅
+CBR = índice California Bearing Ratio, 
+𝐾
+K = constante do método.
+
+Volume de terraplenagem (seções trapezoidais):
+
+𝑉
+=
+𝐿
+2
+(
+𝐴
+1
++
+𝐴
+2
+)
+V=
+2
+L
+	​
+
+(A
+1
+	​
+
++A
+2
+	​
+
+)
+3️⃣ Orçamentos e Quantitativos
+
+Volume de concreto:
+
+𝑉
+𝑐
+=
+𝐿
+⋅
+𝐵
+⋅
+𝐻
+V
+c
+	​
+
+=L⋅B⋅H
+
+Consumo de aço em pilares/vigas:
+
+Kg a
+c
+¸
+o
+=
+∑
+𝑖
+=
+1
+𝑛
+𝑁
+𝑖
+⋅
+𝐿
+𝑖
+⋅
+𝜋
+⋅
+𝑑
+𝑖
+2
+4
+⋅
+𝜌
+Kg a
+c
+¸
+	​
+
+o=
+i=1
+∑
+n
+	​
+
+N
+i
+	​
+
+⋅L
+i
+	​
+
+⋅
+4
+π⋅d
+i
+2
+	​
+
+	​
+
+⋅ρ
+
+Onde 
+𝑑
+𝑖
+d
+i
+	​
+
+ = diâmetro da barra, 
+𝜌
+=
+7.85
+𝑘
+𝑔
+/
+𝑑
+𝑚
+3
+ρ=7.85kg/dm
+3
+.
+
+Cálculo de argamassa (traço em volume):
+
+𝑀
+𝑐
+𝑖
+𝑚
+𝑒
+𝑛
+𝑡
+𝑜
+:
+𝑀
+𝑎
+𝑟
+𝑒
+𝑖
+𝑎
+:
+𝑀
+𝑐
+𝑎
+𝑙
+=
+1
+:
+4
+:
+1
+M
+cimento
+	​
+
+:M
+areia
+	​
+
+:M
+cal
+	​
+
+=1:4:1
+
+Ajustar conforme norma e resistência desejada.
+
+4️⃣ Alvenaria
+
+Paredes de tijolos (consumo de tijolos):
+
+𝑁
+𝑡
+𝑖
+𝑗
+𝑜
+𝑙
+𝑜
+𝑠
+=
+𝐴
+𝑝
+𝐴
+𝑡
++
+𝐴
+𝑟
+N
+tijolos
+	​
+
+=
+A
+t
+	​
+
++A
+r
+	​
+
+A
+p
+	​
+
+	​
+
+
+Onde 
+𝐴
+𝑝
+A
+p
+	​
+
+ = área da parede, 
+𝐴
+𝑡
+A
+t
+	​
+
+ = área do tijolo, 
+𝐴
+𝑟
+A
+r
+	​
+
+ = rejunte.
+
+Carga distribuída na parede:
+
+𝜎
+=
+𝑃
+𝐴
+σ=
+A
+P
+	​
+
+
+Com 
+𝑃
+P = carga aplicada, 
+𝐴
+A = área da seção da parede.
+
+5️⃣ Transporte / Estradas
+
+Cálculo de tráfego equivalente (ESAL):
+
+𝐸
+𝑆
+𝐴
+𝐿
+=
+∑
+(
+𝑁
+𝑖
+⋅
+𝐸
+𝑖
+)
+ESAL=∑(N
+i
+	​
+
+⋅E
+i
+	​
+
+)
+
+Onde 
+𝑁
+𝑖
+N
+i
+	​
+
+ = número de eixos do tipo i, 
+𝐸
+𝑖
+E
+i
+	​
+
+ = fator de equivalência de carga.
+
+Volume de aterro/corte:
+
+𝑉
+=
+𝐿
+6
+(
+𝐴
+1
++
+4
+𝐴
+𝑚
++
+𝐴
+2
+)
+V=
+6
+L
+	​
+
+(A
+1
+	​
+
++4A
+m
+	​
+
++A
+2
+	​
+
+)
+
+Área média 
+𝐴
+𝑚
+A
+m
+	​
+
+ = média entre duas seções + seção intermediária.
+
+6️⃣ Saneamento
+
+Vazão máxima de chuva (Método Racional):
+
+𝑄
+=
+𝐶
+⋅
+𝑖
+⋅
+𝐴
+Q=C⋅i⋅A
+
+𝐶
+C = coeficiente de escoamento, 
+𝑖
+i = intensidade da chuva, 
+𝐴
+A = área da bacia.
+
+Velocidade em canal aberto (Manning):
+
+𝑉
+=
+1
+𝑛
+𝑅
+2
+/
+3
+𝑆
+1
+/
+2
+V=
+n
+1
+	​
+
+R
+2/3
+S
+1/2
+
+Onde 
+𝑅
+R = raio hidráulico, 
+𝑆
+S = declividade, 
+𝑛
+n = coeficiente de Manning.
+
+Perda de carga Darcy-Weisbach:
+
+ℎ
+𝑓
+=
+𝑓
+𝐿
+𝐷
+𝑉
+2
+2
+𝑔
+h
+f
+	​
+
+=f
+D
+L
+	​
+
+2g
+V
+2
+	​

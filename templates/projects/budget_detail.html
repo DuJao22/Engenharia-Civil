@@ -1,0 +1,171 @@
+{% extends "base.html" %}
+
+{% block title %}{{ budget.name }} - {{ project.name }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2>{{ budget.name }}</h2>
+                <p class="text-muted mb-0">{{ project.name }} - Versão {{ budget.version }}</p>
+            </div>
+            <div>
+                <span class="badge bg-{% if budget.status == 'rascunho' %}warning{% elif budget.status == 'revisao' %}primary{% else %}success{% endif %} me-2">
+                    {{ budget.status.title() }}
+                </span>
+                <a href="{{ url_for('new_budget_item', project_id=project.id, budget_id=budget.id) }}" class="btn btn-primary">
+                    <i class="fas fa-plus me-1"></i>Adicionar Item
+                </a>
+            </div>
+        </div>
+
+        <!-- Resumo do Orçamento -->
+        <div class="row mb-4">
+            <div class="col-lg-3 col-md-6 mb-3">
+                <div class="card bg-primary text-white">
+                    <div class="card-body text-center">
+                        <h4 class="mb-0">R$ {{ "%.2f"|format(final_totals.total) }}</h4>
+                        <small>Total com Lucro</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-3">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <h5 class="mb-0">R$ {{ "%.2f"|format(totals.total_materials) }}</h5>
+                        <small class="text-muted">Materiais</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-3">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <h5 class="mb-0">R$ {{ "%.2f"|format(totals.total_labor) }}</h5>
+                        <small class="text-muted">Mão de Obra</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-3">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <h5 class="mb-0">{{ "%.1f"|format(budget.profit_margin) }}%</h5>
+                        <small class="text-muted">Margem de Lucro</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Itens do Orçamento -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-list me-2"></i>Itens do Orçamento</h5>
+            </div>
+            <div class="card-body">
+                {% if items %}
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Descrição</th>
+                                <th>Categoria</th>
+                                <th>Qtd</th>
+                                <th>Unidade</th>
+                                <th>Valor Unit.</th>
+                                <th>Total</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in items %}
+                            <tr>
+                                <td>
+                                    {{ item.description }}
+                                    {% if item.notes %}
+                                        <br><small class="text-muted">{{ item.notes }}</small>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <span class="badge bg-secondary">{{ item.category.title() if item.category else 'N/A' }}</span>
+                                </td>
+                                <td>{{ "%.2f"|format(item.quantity) }}</td>
+                                <td>{{ item.unit }}</td>
+                                <td>R$ {{ "%.2f"|format(item.unit_cost) }}</td>
+                                <td><strong>R$ {{ "%.2f"|format(item.total_cost) }}</strong></td>
+                                <td>
+                                    <button class="btn btn-outline-primary btn-sm" onclick="editItem({{ item.id }})">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn btn-outline-danger btn-sm" onclick="deleteItem({{ item.id }})">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                        <tfoot>
+                            <tr class="table-dark">
+                                <th colspan="5" class="text-end">Subtotal:</th>
+                                <th>R$ {{ "%.2f"|format(totals.subtotal) }}</th>
+                                <th></th>
+                            </tr>
+                            <tr class="table-success">
+                                <th colspan="5" class="text-end">Total com Lucro ({{ "%.1f"|format(budget.profit_margin) }}%):</th>
+                                <th>R$ {{ "%.2f"|format(final_totals.total) }}</th>
+                                <th></th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-4">
+                    <i class="fas fa-list fa-3x text-muted mb-3"></i>
+                    <h5 class="text-muted">Nenhum item adicionado</h5>
+                    <p class="text-muted">Adicione itens ao orçamento para começar a calcular custos.</p>
+                    <a href="{{ url_for('new_budget_item', project_id=project.id, budget_id=budget.id) }}" class="btn btn-primary">
+                        <i class="fas fa-plus me-1"></i>Adicionar Primeiro Item
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Ações -->
+        <div class="mt-4">
+            <div class="row">
+                <div class="col-md-6">
+                    <a href="{{ url_for('project_detail', id=project.id) }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-1"></i>Voltar ao Projeto
+                    </a>
+                </div>
+                <div class="col-md-6 text-end">
+                    <button class="btn btn-outline-primary me-2" onclick="duplicateBudget()">
+                        <i class="fas fa-copy me-1"></i>Duplicar
+                    </button>
+                    <a href="{{ url_for('budget_report', project_id=project.id, budget_id=budget.id) }}" class="btn btn-success">
+                        <i class="fas fa-file-pdf me-1"></i>Relatório PDF
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function editItem(itemId) {
+    alert('Funcionalidade de edição em desenvolvimento');
+}
+
+function deleteItem(itemId) {
+    if (confirm('Tem certeza que deseja excluir este item?')) {
+        alert('Funcionalidade de exclusão em desenvolvimento');
+    }
+}
+
+function duplicateBudget() {
+    if (confirm('Deseja duplicar este orçamento?')) {
+        alert('Funcionalidade de duplicação em desenvolvimento');
+    }
+}
+</script>
+{% endblock %}

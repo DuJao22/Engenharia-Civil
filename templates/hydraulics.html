@@ -1,0 +1,240 @@
+{% extends "base.html" %}
+
+{% block title %}Hidráulica - Sistema de Engenharia Civil{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h1>
+            <i class="fas fa-tint me-2"></i>Hidráulica
+        </h1>
+        <p class="text-muted">Cálculo de perdas de carga em tubulações usando Darcy-Weisbach</p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-6">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-pipe me-2"></i>Dados da Tubulação
+                </h5>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    {{ form.hidden_tag() }}
+                    
+                    <div class="mb-3">
+                        {{ form.name.label(class="form-label") }}
+                        {{ form.name(class="form-control" + (" is-invalid" if form.name.errors else "")) }}
+                        {% if form.name.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.name.errors %}{{ error }}{% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            {{ form.pipe_diameter.label(class="form-label") }}
+                            {{ form.pipe_diameter(class="form-control" + (" is-invalid" if form.pipe_diameter.errors else "")) }}
+                            {% if form.pipe_diameter.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.pipe_diameter.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            {{ form.pipe_length.label(class="form-label") }}
+                            {{ form.pipe_length(class="form-control" + (" is-invalid" if form.pipe_length.errors else "")) }}
+                            {% if form.pipe_length.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.pipe_length.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            {{ form.flow_rate.label(class="form-label") }}
+                            {{ form.flow_rate(class="form-control" + (" is-invalid" if form.flow_rate.errors else "")) }}
+                            {% if form.flow_rate.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.flow_rate.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            {{ form.roughness.label(class="form-label") }}
+                            {{ form.roughness(class="form-control" + (" is-invalid" if form.roughness.errors else ""), value="0.1") }}
+                            {% if form.roughness.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.roughness.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                            <div class="form-text">
+                                Valores típicos: PVC = 0,01mm | Ferro galvanizado = 0,15mm | Concreto = 1,5mm
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-grid">
+                        {{ form.submit(class="btn btn-info btn-lg") }}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-6">
+        {% if result %}
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-chart-area me-2"></i>Resultados Hidráulicos
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-12">
+                        <div class="text-center p-3 bg-danger bg-opacity-10 rounded">
+                            <i class="fas fa-arrow-down text-danger fs-3 mb-2"></i>
+                            <h6 class="text-danger mb-1">Perda de Carga</h6>
+                            <h3 class="mb-0 text-danger">{{ result.head_loss }} m</h3>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="text-center p-3 bg-info bg-opacity-10 rounded">
+                            <i class="fas fa-tachometer-alt text-info fs-4 mb-2"></i>
+                            <h6 class="text-info mb-1">Velocidade</h6>
+                            <h5 class="mb-0">{{ result.velocity }} m/s</h5>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="text-center p-3 bg-warning bg-opacity-10 rounded">
+                            <i class="fas fa-circle text-warning fs-4 mb-2"></i>
+                            <h6 class="text-warning mb-1">Área</h6>
+                            <h5 class="mb-0">{{ result.area }} cm²</h5>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="text-center p-3 bg-success bg-opacity-10 rounded">
+                            <i class="fas fa-water text-success fs-4 mb-2"></i>
+                            <h6 class="text-success mb-1">Vazão</h6>
+                            <h5 class="mb-0">{{ result.flow_rate_ms }} m³/s</h5>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="text-center p-3 bg-secondary bg-opacity-10 rounded">
+                            <i class="fas fa-hashtag text-secondary fs-4 mb-2"></i>
+                            <h6 class="text-secondary mb-1">Reynolds</h6>
+                            <h5 class="mb-0">{{ result.reynolds }}</h5>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-4">
+                    <h6 class="mb-3">Parâmetros de Cálculo:</h6>
+                    <div class="bg-dark text-white rounded p-3">
+                        <div class="row">
+                            <div class="col-6">
+                                <small>
+                                    <strong>Fator de atrito (f):</strong> {{ result.friction_factor }}<br>
+                                    <strong>Regime:</strong> 
+                                    {% if result.reynolds > 4000 %}
+                                        Turbulento
+                                    {% elif result.reynolds > 2300 %}
+                                        Transição
+                                    {% else %}
+                                        Laminar
+                                    {% endif %}
+                                </small>
+                            </div>
+                            <div class="col-6">
+                                <small>
+                                    <strong>Equação:</strong> Darcy-Weisbach<br>
+                                    <strong>Método:</strong> Swamee-Jain
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {% if result.velocity > 3.0 %}
+                <div class="alert alert-warning mt-3">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <strong>Atenção:</strong> Velocidade elevada (>3,0 m/s). Verificar ruído e desgaste.
+                </div>
+                {% elif result.velocity < 0.6 %}
+                <div class="alert alert-info mt-3">
+                    <i class="fas fa-info-circle me-2"></i>
+                    <strong>Observação:</strong> Velocidade baixa (<0,6 m/s). Verificar autolimpeza.
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% else %}
+        <div class="card border-0 shadow-sm">
+            <div class="card-body text-center text-muted">
+                <i class="fas fa-tint fs-1 mb-3"></i>
+                <h5>Aguardando Cálculo</h5>
+                <p>Preencha os dados da tubulação e clique em "Calcular"</p>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Theory Section -->
+<div class="row mt-5">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-book-open me-2"></i>Equações e Metodologia
+                </h5>
+            </div>
+            <div class="card-body">
+                <p>
+                    Este módulo utiliza a equação universal de Darcy-Weisbach para cálculo de perda de carga 
+                    em escoamento permanente e uniforme em tubulações circulares.
+                </p>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Equação de Darcy-Weisbach:</h6>
+                        <div class="bg-dark text-white rounded p-3 text-center">
+                            <strong>h<sub>f</sub> = f × (L/D) × (V²/2g)</strong>
+                        </div>
+                        <small class="text-muted">
+                            Onde:<br>
+                            • h<sub>f</sub> = perda de carga (m)<br>
+                            • f = fator de atrito (adimensional)<br>
+                            • L = comprimento da tubulação (m)<br>
+                            • D = diâmetro interno (m)<br>
+                            • V = velocidade média (m/s)<br>
+                            • g = aceleração da gravidade (9,81 m/s²)
+                        </small>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <h6>Cálculo do Fator de Atrito:</h6>
+                        <div class="bg-dark text-white rounded p-3">
+                            <p class="mb-2"><strong>Fórmula de Swamee-Jain:</strong></p>
+                            <small class="text-muted">
+                                Para escoamento turbulento em tubos rugosos.<br>
+                                Válida para: 10³ ≤ Re ≤ 10⁸ e 10⁻⁶ ≤ ε/D ≤ 10⁻²
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

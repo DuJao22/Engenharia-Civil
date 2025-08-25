@@ -1,0 +1,748 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Sistema de Engenharia Civil{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h1 class="mb-3">
+            <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+        </h1>
+        <p class="text-muted">Bem-vindo ao sistema de cálculos de engenharia civil</p>
+    </div>
+</div>
+
+<!-- User Info & Trial Status -->
+<div class="row mb-4">
+    <div class="col-12">
+        {% if plan_status.type == 'trial' %}
+        <div class="alert alert-success d-flex align-items-center">
+            <i class="fas fa-gift me-3 fs-4"></i>
+            <div>
+                <strong>{{ current_user.name }}</strong> | 
+                <span class="badge bg-success">{{ plan_status.name }}</span>
+                | Tipo: <span class="badge bg-{% if current_user.role == 'admin' %}danger{% elif current_user.role == 'engineer' %}primary{% else %}secondary{% endif %}">
+                    {{ current_user.role.title() }}
+                </span>
+                <br><small>
+                    <strong>🎉 Acesso completo liberado!</strong> 
+                    Restam {{ plan_status.days_remaining }} dias do seu período de teste.
+                    {% if plan_status.days_remaining <= 2 %}
+                    <span class="text-danger">Faça upgrade para não perder o acesso!</span>
+                    {% endif %}
+                </small>
+            </div>
+        </div>
+        {% elif plan_status.type == 'pro' %}
+        <div class="alert alert-primary d-flex align-items-center">
+            <i class="fas fa-crown me-3 fs-4"></i>
+            <div>
+                <strong>{{ current_user.name }}</strong> | 
+                <span class="badge bg-primary">{{ plan_status.name }}</span>
+                | Tipo: <span class="badge bg-{% if current_user.role == 'admin' %}danger{% elif current_user.role == 'engineer' %}primary{% else %}secondary{% endif %}">
+                    {{ current_user.role.title() }}
+                </span>
+                <br><small>Acesso completo até {{ plan_status.expires.strftime('%d/%m/%Y') }}</small>
+            </div>
+        </div>
+        {% else %}
+        <div class="alert alert-warning d-flex align-items-center">
+            <i class="fas fa-info-circle me-3 fs-4"></i>
+            <div>
+                <strong>{{ current_user.name }}</strong> | 
+                <span class="badge bg-secondary">{{ plan_status.name }}</span>
+                | Tipo: <span class="badge bg-{% if current_user.role == 'admin' %}danger{% elif current_user.role == 'engineer' %}primary{% else %}secondary{% endif %}">
+                    {{ current_user.role.title() }}
+                </span>
+                <br><small>Acesso limitado aos módulos básicos. Upgrade para o plano Pro para acesso completo!</small>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Dashboard Statistics -->
+<div class="row mb-5">
+    <div class="col-12">
+        <h3 class="mb-3">Visão Geral</h3>
+    </div>
+    
+    <div class="col-lg-3 col-md-6 mb-3">
+        <div class="card bg-primary text-white h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4 class="mb-0">{{ stats.total_projects }}</h4>
+                        <p class="mb-0">Projetos</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-project-diagram fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer bg-primary-dark">
+                <small>
+                    <i class="fas fa-play text-success me-1"></i>{{ stats.active_projects }} ativos
+                    <i class="fas fa-check text-light ms-2 me-1"></i>{{ stats.completed_projects }} concluídos
+                </small>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-3 col-md-6 mb-3">
+        <div class="card bg-success text-white h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4 class="mb-0">R$ {{ "%.0f"|format(stats.total_budget_value / 1000) }}k</h4>
+                        <p class="mb-0">Total em Orçamentos</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-dollar-sign fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer bg-success-dark">
+                <small>
+                    <i class="fas fa-file-invoice me-1"></i>{{ stats.total_budgets }} orçamentos criados
+                </small>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-3 col-md-6 mb-3">
+        <div class="card bg-info text-white h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4 class="mb-0">{{ stats.total_calculations }}</h4>
+                        <p class="mb-0">Cálculos Realizados</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-calculator fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer bg-info-dark">
+                <small>
+                    <i class="fas fa-chart-line me-1"></i>Últimos 6 meses
+                </small>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-3 col-md-6 mb-3">
+        <div class="card bg-{% if plan_status.type == 'trial' %}success{% elif plan_status.type == 'pro' %}primary{% else %}warning{% endif %} text-white h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4 class="mb-0">{{ plan_status.name }}</h4>
+                        <p class="mb-0">Plano Atual</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-{% if plan_status.type == 'trial' %}gift{% elif plan_status.type == 'pro' %}crown{% else %}user{% endif %} fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer bg-{% if plan_status.type == 'trial' %}success{% elif plan_status.type == 'pro' %}primary{% else %}warning{% endif %}-dark">
+                <small>
+                    {% if plan_status.type == 'trial' %}
+                        <i class="fas fa-clock me-1"></i>{{ plan_status.days_remaining }} dias restantes
+                    {% elif plan_status.type == 'pro' %}
+                        <i class="fas fa-check me-1"></i>Acesso completo
+                    {% else %}
+                        <i class="fas fa-arrow-up me-1"></i>Upgrade disponível
+                    {% endif %}
+                </small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Charts Row -->
+<div class="row mb-5">
+    <div class="col-lg-6 mb-4">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-chart-pie me-2"></i>Cálculos por Módulo</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="calculationsChart" height="300"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-6 mb-4">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-chart-bar me-2"></i>Status dos Projetos</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="projectsChart" height="300"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Activity Chart -->
+<div class="row mb-5">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-chart-line me-2"></i>Atividade dos Últimos 6 Meses</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="activityChart" height="100"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Access Modules -->
+<div class="row mb-5">
+    <div class="col-12">
+        <h3 class="mb-3">Módulos de Cálculo</h3>
+    </div>
+</div>
+
+<div class="row g-3 mb-5">
+    <div class="col-md-6 col-lg-4">
+        <a href="{{ url_for('structural') }}" class="text-decoration-none">
+            <div class="card h-100 border-0 shadow-sm hover-shadow">
+                <div class="card-body text-center p-4">
+                    <i class="fas fa-bridge text-primary fs-1 mb-3"></i>
+                    <h5 class="card-title">Análise Estrutural</h5>
+                    <p class="card-text text-muted small">
+                        Momentos, cortantes e deflexões
+                    </p>
+                    {% if current_user.has_access_to_module('structural_basic') %}
+                        <span class="badge bg-success">Disponível</span>
+                    {% else %}
+                        <span class="badge bg-secondary">Pro</span>
+                    {% endif %}
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <div class="col-md-6 col-lg-4">
+        <a href="{{ url_for('concrete') }}" class="text-decoration-none">
+            <div class="card h-100 border-0 shadow-sm hover-shadow">
+                <div class="card-body text-center p-4">
+                    <i class="fas fa-industry text-success fs-1 mb-3"></i>
+                    <h5 class="card-title">Concreto Armado</h5>
+                    <p class="card-text text-muted small">
+                        Dimensionamento NBR 6118
+                    </p>
+                    {% if current_user.has_access_to_module('concrete') %}
+                        <span class="badge bg-success">Disponível</span>
+                    {% else %}
+                        <span class="badge bg-secondary">Pro</span>
+                    {% endif %}
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <div class="col-md-6 col-lg-4">
+        <a href="{{ url_for('hydraulics') }}" class="text-decoration-none">
+            <div class="card h-100 border-0 shadow-sm hover-shadow">
+                <div class="card-body text-center p-4">
+                    <i class="fas fa-tint text-info fs-1 mb-3"></i>
+                    <h5 class="card-title">Hidráulica</h5>
+                    <p class="card-text text-muted small">
+                        Perdas de carga e escoamento
+                    </p>
+                    {% if current_user.has_access_to_module('hydraulics_basic') %}
+                        <span class="badge bg-success">Disponível</span>
+                    {% else %}
+                        <span class="badge bg-secondary">Pro</span>
+                    {% endif %}
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <div class="col-md-6 col-lg-4">
+        <a href="{{ url_for('foundations') }}" class="text-decoration-none">
+            <div class="card h-100 border-0 shadow-sm hover-shadow">
+                <div class="card-body text-center p-4">
+                    <i class="fas fa-home text-warning fs-1 mb-3"></i>
+                    <h5 class="card-title">Fundações</h5>
+                    <p class="card-text text-muted small">
+                        Capacidade de carga e sapatas
+                    </p>
+                    {% if current_user.has_access_to_module('foundations') %}
+                        <span class="badge bg-success">Disponível</span>
+                    {% else %}
+                        <span class="badge bg-secondary">Pro</span>
+                    {% endif %}
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <div class="col-md-6 col-lg-4">
+        <a href="{{ url_for('topography') }}" class="text-decoration-none">
+            <div class="card h-100 border-0 shadow-sm hover-shadow">
+                <div class="card-body text-center p-4">
+                    <i class="fas fa-map text-danger fs-1 mb-3"></i>
+                    <h5 class="card-title">Topografia</h5>
+                    <p class="card-text text-muted small">
+                        Áreas e volumes
+                    </p>
+                    {% if current_user.has_access_to_module('topography') %}
+                        <span class="badge bg-success">Disponível</span>
+                    {% else %}
+                        <span class="badge bg-secondary">Pro</span>
+                    {% endif %}
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <div class="col-md-6 col-lg-4">
+        <a href="{{ url_for('earth_pressure') }}" class="text-decoration-none">
+            <div class="card h-100 border-0 shadow-sm hover-shadow">
+                <div class="card-body text-center p-4">
+                    <i class="fas fa-mountain text-warning fs-1 mb-3"></i>
+                    <h5 class="card-title">Geotecnia</h5>
+                    <p class="card-text text-muted small">
+                        Empuxos de terra e adensamento
+                    </p>
+                    {% if current_user.has_access_to_module('geotechnical') %}
+                        <span class="badge bg-success">Disponível</span>
+                    {% else %}
+                        <span class="badge bg-secondary">Pro</span>
+                    {% endif %}
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <div class="col-md-6 col-lg-4">
+        <a href="{{ url_for('pavement_cbr') }}" class="text-decoration-none">
+            <div class="card h-100 border-0 shadow-sm hover-shadow">
+                <div class="card-body text-center p-4">
+                    <i class="fas fa-road text-secondary fs-1 mb-3"></i>
+                    <h5 class="card-title">Pavimentação</h5>
+                    <p class="card-text text-muted small">
+                        CBR, terraplenagem e ESAL
+                    </p>
+                    {% if current_user.has_access_to_module('pavement') %}
+                        <span class="badge bg-success">Disponível</span>
+                    {% else %}
+                        <span class="badge bg-secondary">Pro</span>
+                    {% endif %}
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <div class="col-md-6 col-lg-4">
+        <a href="{{ url_for('concrete_volume') }}" class="text-decoration-none">
+            <div class="card h-100 border-0 shadow-sm hover-shadow">
+                <div class="card-body text-center p-4">
+                    <i class="fas fa-cube text-info fs-1 mb-3"></i>
+                    <h5 class="card-title">Quantitativos</h5>
+                    <p class="card-text text-muted small">
+                        Concreto, aço e materiais
+                    </p>
+                    {% if current_user.has_access_to_module('quantities') %}
+                        <span class="badge bg-success">Disponível</span>
+                    {% else %}
+                        <span class="badge bg-secondary">Pro</span>
+                    {% endif %}
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <div class="col-md-6 col-lg-4">
+        <a href="{{ url_for('brick_consumption') }}" class="text-decoration-none">
+            <div class="card h-100 border-0 shadow-sm hover-shadow">
+                <div class="card-body text-center p-4">
+                    <i class="fas fa-th-large text-danger fs-1 mb-3"></i>
+                    <h5 class="card-title">Alvenaria</h5>
+                    <p class="card-text text-muted small">
+                        Tijolos, blocos e cargas
+                    </p>
+                    {% if current_user.has_access_to_module('masonry') %}
+                        <span class="badge bg-success">Disponível</span>
+                    {% else %}
+                        <span class="badge bg-secondary">Pro</span>
+                    {% endif %}
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <div class="col-md-6 col-lg-4">
+        <a href="{{ url_for('rational_method') }}" class="text-decoration-none">
+            <div class="card h-100 border-0 shadow-sm hover-shadow">
+                <div class="card-body text-center p-4">
+                    <i class="fas fa-tint text-primary fs-1 mb-3"></i>
+                    <h5 class="card-title">Saneamento</h5>
+                    <p class="card-text text-muted small">
+                        Drenagem e hidráulica urbana
+                    </p>
+                    {% if current_user.has_access_to_module('sanitation') %}
+                        <span class="badge bg-success">Disponível</span>
+                    {% else %}
+                        <span class="badge bg-secondary">Pro</span>
+                    {% endif %}
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <div class="col-md-6 col-lg-4">
+        <a href="{{ url_for('torsion_shear') }}" class="text-decoration-none">
+            <div class="card h-100 border-0 shadow-sm hover-shadow">
+                <div class="card-body text-center p-4">
+                    <i class="fas fa-cog text-info fs-1 mb-3"></i>
+                    <h5 class="card-title">Estruturas Avançadas</h5>
+                    <p class="card-text text-muted small">
+                        Torção, flambagem, vigas contínuas
+                    </p>
+                    {% if current_user.has_access_to_module('advanced_structural') %}
+                        <span class="badge bg-success">Disponível</span>
+                    {% else %}
+                        <span class="badge bg-secondary">Pro</span>
+                    {% endif %}
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <div class="col-md-6 col-lg-4">
+        <a href="{{ url_for('concentration_time') }}" class="text-decoration-none">
+            <div class="card h-100 border-0 shadow-sm hover-shadow">
+                <div class="card-body text-center p-4">
+                    <i class="fas fa-water text-primary fs-1 mb-3"></i>
+                    <h5 class="card-title">Hidrologia</h5>
+                    <p class="card-text text-muted small">
+                        Tempo de concentração, detenção
+                    </p>
+                    {% if current_user.has_access_to_module('hydrology') %}
+                        <span class="badge bg-success">Disponível</span>
+                    {% else %}
+                        <span class="badge bg-secondary">Pro</span>
+                    {% endif %}
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <div class="col-md-6 col-lg-4">
+        <a href="{{ url_for('steel_tension') }}" class="text-decoration-none">
+            <div class="card h-100 border-0 shadow-sm hover-shadow">
+                <div class="card-body text-center p-4">
+                    <i class="fas fa-weight-hanging text-secondary fs-1 mb-3"></i>
+                    <h5 class="card-title">Estruturas Metálicas</h5>
+                    <p class="card-text text-muted small">
+                        Tensão, deflexão, NBR 8800
+                    </p>
+                    {% if current_user.has_access_to_module('steel_structures') %}
+                        <span class="badge bg-success">Disponível</span>
+                    {% else %}
+                        <span class="badge bg-secondary">Pro</span>
+                    {% endif %}
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <div class="col-md-6 col-lg-4">
+        <a href="{{ url_for('productivity') }}" class="text-decoration-none">
+            <div class="card h-100 border-0 shadow-sm hover-shadow">
+                <div class="card-body text-center p-4">
+                    <i class="fas fa-chart-line text-success fs-1 mb-3"></i>
+                    <h5 class="card-title">Controle de Obras</h5>
+                    <p class="card-text text-muted small">
+                        Produtividade, Curva S
+                    </p>
+                    {% if current_user.has_access_to_module('construction_control') %}
+                        <span class="badge bg-success">Disponível</span>
+                    {% else %}
+                        <span class="badge bg-secondary">Pro</span>
+                    {% endif %}
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <div class="col-md-6 col-lg-4">
+        <a href="{{ url_for('carbon_footprint') }}" class="text-decoration-none">
+            <div class="card h-100 border-0 shadow-sm hover-shadow">
+                <div class="card-body text-center p-4">
+                    <i class="fas fa-leaf text-success fs-1 mb-3"></i>
+                    <h5 class="card-title">Sustentabilidade</h5>
+                    <p class="card-text text-muted small">
+                        Pegada de carbono, eficiência energética
+                    </p>
+                    {% if current_user.has_access_to_module('sustainability') %}
+                        <span class="badge bg-success">Disponível</span>
+                    {% else %}
+                        <span class="badge bg-secondary">Pro</span>
+                    {% endif %}
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <div class="col-md-6 col-lg-4">
+        <a href="{{ url_for('projects') }}" class="text-decoration-none">
+            <div class="card h-100 border-0 shadow-sm hover-shadow">
+                <div class="card-body text-center p-4">
+                    <i class="fas fa-project-diagram text-warning fs-1 mb-3"></i>
+                    <h5 class="card-title">Gestão de Projetos</h5>
+                    <p class="card-text text-muted small">
+                        Orçamentos, cronogramas e SINAPI
+                    </p>
+                    <span class="badge bg-success">Disponível</span>
+                </div>
+            </div>
+        </a>
+    </div>
+</div>
+
+<!-- Recent Calculations -->
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h3>Cálculos Recentes</h3>
+            <a href="{{ url_for('history') }}" class="btn btn-outline-primary">
+                <i class="fas fa-history me-1"></i>Ver Todos
+            </a>
+        </div>
+        
+        {% if calculations %}
+        <div class="card border-0 shadow-sm">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Nome</th>
+                                <th>Módulo</th>
+                                <th>Data</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for calc in calculations %}
+                            <tr>
+                                <td>{{ calc.name }}</td>
+                                <td>
+                                    <span class="badge bg-secondary">{{ calc.module.title() }}</span>
+                                </td>
+                                <td>{{ calc.created_at.strftime('%d/%m/%Y %H:%M') }}</td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-primary" onclick="viewCalculation({{ calc.id }})">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="alert alert-light text-center">
+            <i class="fas fa-calculator text-muted fs-1 mb-3"></i>
+            <h5>Nenhum cálculo realizado ainda</h5>
+            <p class="text-muted">Comece usando um dos módulos acima</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+// Dados para os gráficos vindos do backend
+const calculationsData = {{ stats.calculations_by_module | tojson }};
+const projectsData = {{ stats.projects_by_status | tojson }};
+const activityData = {{ stats.monthly_activity | tojson }};
+
+// Gráfico de Cálculos por Módulo (Pizza)
+const calculationsCtx = document.getElementById('calculationsChart').getContext('2d');
+const calculationsChart = new Chart(calculationsCtx, {
+    type: 'doughnut',
+    data: {
+        labels: Object.keys(calculationsData).map(key => {
+            return {
+                'structural': 'Estrutural',
+                'concrete': 'Concreto',
+                'hydraulics': 'Hidráulica', 
+                'foundations': 'Fundações',
+                'topography': 'Topografia',
+                'geotechnical': 'Geotecnia',
+                'pavement': 'Pavimentação',
+                'quantities': 'Quantitativos',
+                'masonry': 'Alvenaria',
+                'sanitation': 'Saneamento',
+                'advanced_structural': 'Estruturas Avançadas',
+                'hydrology': 'Hidrologia',
+                'steel_structures': 'Estruturas Metálicas',
+                'construction_control': 'Controle de Obras',
+                'sustainability': 'Sustentabilidade'
+            }[key] || key.charAt(0).toUpperCase() + key.slice(1);
+        }),
+        datasets: [{
+            data: Object.values(calculationsData),
+            backgroundColor: [
+                '#3498db', '#2ecc71', '#e74c3c', '#f39c12', '#9b59b6', '#1abc9c'
+            ],
+            borderWidth: 2,
+            borderColor: '#ffffff'
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                position: 'bottom'
+            }
+        }
+    }
+});
+
+// Gráfico de Status dos Projetos (Barras)
+const projectsCtx = document.getElementById('projectsChart').getContext('2d');
+const projectsChart = new Chart(projectsCtx, {
+    type: 'bar',
+    data: {
+        labels: ['Planejamento', 'Ativo', 'Pausado', 'Concluído'],
+        datasets: [{
+            label: 'Projetos',
+            data: [
+                projectsData.planejamento,
+                projectsData.ativo,
+                projectsData.pausado,
+                projectsData.concluido
+            ],
+            backgroundColor: ['#f39c12', '#2ecc71', '#e67e22', '#3498db'],
+            borderColor: ['#e67e22', '#27ae60', '#d35400', '#2980b9'],
+            borderWidth: 1
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                display: false
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    stepSize: 1
+                }
+            }
+        }
+    }
+});
+
+// Gráfico de Atividade Mensal (Linha)
+const activityCtx = document.getElementById('activityChart').getContext('2d');
+const sortedMonths = Object.keys(activityData).sort();
+const activityChart = new Chart(activityCtx, {
+    type: 'line',
+    data: {
+        labels: sortedMonths.map(month => {
+            const [year, monthNum] = month.split('-');
+            const monthNames = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun',
+                              'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+            return monthNames[parseInt(monthNum) - 1] + '/' + year.slice(2);
+        }),
+        datasets: [{
+            label: 'Cálculos Realizados',
+            data: sortedMonths.map(month => activityData[month]),
+            borderColor: '#3498db',
+            backgroundColor: 'rgba(52, 152, 219, 0.1)',
+            fill: true,
+            tension: 0.4
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                display: false
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    stepSize: 1
+                }
+            }
+        }
+    }
+});
+
+function viewCalculation(calcId) {
+    // Placeholder for viewing calculation details
+    alert('Funcionalidade de visualização em desenvolvimento');
+}
+
+// Atualizar gráficos quando a janela é redimensionada
+window.addEventListener('resize', function() {
+    calculationsChart.resize();
+    projectsChart.resize();
+    activityChart.resize();
+});
+</script>
+
+<style>
+/* Cores customizadas para os cards */
+.bg-primary-dark {
+    background-color: rgba(52, 73, 94, 0.8) !important;
+}
+
+.bg-success-dark {
+    background-color: rgba(39, 174, 96, 0.8) !important;
+}
+
+.bg-info-dark {
+    background-color: rgba(41, 128, 185, 0.8) !important;
+}
+
+.bg-warning-dark {
+    background-color: rgba(230, 126, 34, 0.8) !important;
+}
+
+/* Efeito hover nos cards */
+.hover-shadow {
+    transition: all 0.3s ease;
+}
+
+.hover-shadow:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15) !important;
+}
+
+/* Responsive dos gráficos */
+.card-body canvas {
+    max-height: 300px;
+}
+
+@media (max-width: 768px) {
+    .card-body canvas {
+        max-height: 250px;
+    }
+}
+</style>
+{% endblock %}

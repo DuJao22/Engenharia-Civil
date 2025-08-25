@@ -1,0 +1,277 @@
+{% extends "base.html" %}
+
+{% block title %}{{ schedule.name }} - {{ project.name }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2>{{ schedule.name }}</h2>
+                <p class="text-muted mb-0">{{ project.name }} - Versão {{ schedule.version }}</p>
+            </div>
+            <div>
+                {% if schedule.total_duration %}
+                    <span class="badge bg-info me-2">{{ schedule.total_duration }} dias</span>
+                {% endif %}
+                <a href="{{ url_for('new_activity', project_id=project.id, schedule_id=schedule.id) }}" class="btn btn-primary">
+                    <i class="fas fa-plus me-1"></i>Nova Atividade
+                </a>
+            </div>
+        </div>
+
+        <!-- Resumo do Cronograma -->
+        {% if cmp_data %}
+        <div class="row mb-4">
+            <div class="col-lg-3 col-md-6 mb-3">
+                <div class="card bg-primary text-white">
+                    <div class="card-body text-center">
+                        <h4 class="mb-0">{{ cmp_data.project_duration }}</h4>
+                        <small>Dias Totais</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-3">
+                <div class="card bg-danger text-white">
+                    <div class="card-body text-center">
+                        <h4 class="mb-0">{{ cmp_data.critical_path|length }}</h4>
+                        <small>Atividades Críticas</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-3">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <h4 class="mb-0">{{ activities|length }}</h4>
+                        <small>Total de Atividades</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-3">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <h4 class="mb-0">{{ "%.1f"|format((activities|selectattr('progress', '>', 0)|list|length / activities|length * 100) if activities else 0) }}%</h4>
+                        <small>Progresso Geral</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Gráfico de Gantt -->
+        {% if gantt_data %}
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-chart-gantt me-2"></i>Gráfico de Gantt</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th style="width: 200px;">Atividade</th>
+                                <th>Cronograma</th>
+                                <th style="width: 80px;">Duração</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for activity in gantt_data %}
+                            <tr>
+                                <td>
+                                    <strong {% if activity.is_critical %}class="text-danger"{% endif %}>
+                                        {{ activity.name }}
+                                    </strong>
+                                    {% if activity.is_critical %}
+                                        <span class="badge bg-danger ms-1">Crítica</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="gantt-bar-container" style="position: relative; height: 25px; background: #f8f9fa; border-radius: 3px;">
+                                        <div class="gantt-bar" 
+                                             style="position: absolute; height: 100%; 
+                                                    background: {% if activity.is_critical %}#dc3545{% else %}#0d6efd{% endif %}; 
+                                                    border-radius: 3px; 
+                                                    left: 0%; width: {{ (activity.duration / schedule.total_duration * 100) if schedule.total_duration else 0 }}%;">
+                                        </div>
+                                        <small class="gantt-text" style="position: absolute; left: 5px; top: 3px; font-size: 11px;">
+                                            {{ activity.start_date }} - {{ activity.end_date }}
+                                        </small>
+                                    </div>
+                                </td>
+                                <td class="text-center">{{ activity.duration }}d</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Lista de Atividades -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-tasks me-2"></i>Atividades do Cronograma</h5>
+            </div>
+            <div class="card-body">
+                {% if activities %}
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Atividade</th>
+                                <th>Duração</th>
+                                <th>Início</th>
+                                <th>Fim</th>
+                                <th>Progresso</th>
+                                <th>Responsável</th>
+                                <th>Custo</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for activity in activities %}
+                            <tr {% if activity.is_critical %}class="table-danger"{% endif %}>
+                                <td>
+                                    <strong>{{ activity.name }}</strong>
+                                    {% if activity.is_critical %}
+                                        <span class="badge bg-danger ms-1">Crítica</span>
+                                    {% endif %}
+                                    {% if activity.description %}
+                                        <br><small class="text-muted">{{ activity.description }}</small>
+                                    {% endif %}
+                                </td>
+                                <td>{{ activity.duration }} dias</td>
+                                <td>
+                                    {% if activity.start_date %}
+                                        {{ activity.start_date.strftime('%d/%m/%Y') }}
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if activity.end_date %}
+                                        {{ activity.end_date.strftime('%d/%m/%Y') }}
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="progress" style="height: 20px;">
+                                        <div class="progress-bar" role="progressbar" 
+                                             style="width: {{ activity.progress }}%"
+                                             aria-valuenow="{{ activity.progress }}" 
+                                             aria-valuemin="0" aria-valuemax="100">
+                                            {{ "%.0f"|format(activity.progress) }}%
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>{{ activity.responsible or '-' }}</td>
+                                <td>
+                                    {% if activity.cost > 0 %}
+                                        R$ {{ "%.2f"|format(activity.cost) }}
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <button class="btn btn-outline-primary btn-sm" onclick="editActivity({{ activity.id }})">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="btn btn-outline-success btn-sm" onclick="updateProgress({{ activity.id }})">
+                                            <i class="fas fa-chart-line"></i>
+                                        </button>
+                                        <button class="btn btn-outline-danger btn-sm" onclick="deleteActivity({{ activity.id }})">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-4">
+                    <i class="fas fa-tasks fa-3x text-muted mb-3"></i>
+                    <h5 class="text-muted">Nenhuma atividade adicionada</h5>
+                    <p class="text-muted">Adicione atividades para criar o cronograma do projeto.</p>
+                    <a href="{{ url_for('new_activity', project_id=project.id, schedule_id=schedule.id) }}" class="btn btn-primary">
+                        <i class="fas fa-plus me-1"></i>Adicionar Primeira Atividade
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Caminho Crítico -->
+        {% if cmp_data and cmp_data.critical_path %}
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5 class="mb-0 text-danger"><i class="fas fa-exclamation-triangle me-2"></i>Caminho Crítico</h5>
+            </div>
+            <div class="card-body">
+                <p class="text-muted">As seguintes atividades fazem parte do caminho crítico e não podem atrasar:</p>
+                <div class="row">
+                    {% for activity in cmp_data.critical_activities %}
+                    <div class="col-md-6 col-lg-4 mb-2">
+                        <div class="alert alert-danger mb-2">
+                            <strong>{{ activity.name }}</strong><br>
+                            <small>{{ activity.duration }} dias - Folga: {{ activity.slack }}d</small>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Ações -->
+        <div class="mt-4">
+            <div class="row">
+                <div class="col-md-6">
+                    <a href="{{ url_for('project_detail', id=project.id) }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-1"></i>Voltar ao Projeto
+                    </a>
+                </div>
+                <div class="col-md-6 text-end">
+                    <button class="btn btn-outline-primary me-2" onclick="exportGantt()">
+                        <i class="fas fa-download me-1"></i>Exportar Gantt
+                    </button>
+                    <button class="btn btn-success" onclick="generateReport()">
+                        <i class="fas fa-file-pdf me-1"></i>Relatório PDF
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function editActivity(activityId) {
+    alert('Funcionalidade de edição em desenvolvimento');
+}
+
+function updateProgress(activityId) {
+    const newProgress = prompt('Digite o novo progresso (0-100):');
+    if (newProgress !== null && !isNaN(newProgress)) {
+        alert(`Atualizar progresso para ${newProgress}% - funcionalidade em desenvolvimento`);
+    }
+}
+
+function deleteActivity(activityId) {
+    if (confirm('Tem certeza que deseja excluir esta atividade?')) {
+        alert('Funcionalidade de exclusão em desenvolvimento');
+    }
+}
+
+function exportGantt() {
+    alert('Exportação do Gráfico de Gantt em desenvolvimento');
+}
+
+function generateReport() {
+    alert('Geração de relatório em desenvolvimento');
+}
+</script>
+{% endblock %}

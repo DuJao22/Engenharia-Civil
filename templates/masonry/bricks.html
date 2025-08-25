@@ -1,0 +1,228 @@
+{% extends "base.html" %}
+
+{% block title %}Consumo de Tijolos - Sistema de Engenharia Civil{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h1>
+            <i class="fas fa-th-large me-2"></i>Consumo de Tijolos
+        </h1>
+        <p class="text-muted">Cálculo de consumo de tijolos e argamassa para alvenaria</p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-6">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-warning text-dark">
+                <h5 class="mb-0">
+                    <i class="fas fa-ruler-combined me-2"></i>Dados da Alvenaria
+                </h5>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    {{ form.hidden_tag() }}
+                    
+                    <div class="mb-3">
+                        {{ form.name.label(class="form-label") }}
+                        {{ form.name(class="form-control" + (" is-invalid" if form.name.errors else "")) }}
+                        {% if form.name.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.name.errors %}{{ error }}{% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form.wall_area.label(class="form-label") }}
+                        {{ form.wall_area(class="form-control" + (" is-invalid" if form.wall_area.errors else "")) }}
+                        {% if form.wall_area.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.wall_area.errors %}{{ error }}{% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            {{ form.brick_length.label(class="form-label") }}
+                            {{ form.brick_length(class="form-control" + (" is-invalid" if form.brick_length.errors else ""), value="19") }}
+                            {% if form.brick_length.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.brick_length.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            {{ form.brick_height.label(class="form-label") }}
+                            {{ form.brick_height(class="form-control" + (" is-invalid" if form.brick_height.errors else ""), value="9") }}
+                            {% if form.brick_height.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.brick_height.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            {{ form.mortar_joint.label(class="form-label") }}
+                            {{ form.mortar_joint(class="form-control" + (" is-invalid" if form.mortar_joint.errors else ""), value="1") }}
+                            {% if form.mortar_joint.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.mortar_joint.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="d-grid">
+                        {{ form.submit(class="btn btn-warning btn-lg") }}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-6">
+        {% if result %}
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-warning text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-chart-bar me-2"></i>Consumo de Materiais
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-12">
+                        <div class="bg-dark text-white rounded p-3">
+                            <h6 class="text-warning mb-2">
+                                <i class="fas fa-info-circle me-1"></i>Dados de Entrada
+                            </h6>
+                            <ul class="list-unstyled mb-0 small">
+                                <li><strong>Área da parede:</strong> {{ result.wall_area }} m²</li>
+                                <li><strong>Tijolo:</strong> {{ result.brick_dimensions }}</li>
+                                <li><strong>Junta:</strong> {{ form.mortar_joint.data }} cm</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="text-center p-3 bg-primary bg-opacity-10 rounded">
+                            <i class="fas fa-th-large text-primary fs-3 mb-2"></i>
+                            <h6 class="text-primary mb-1">Tijolos Teóricos</h6>
+                            <h4 class="mb-0">{{ result.num_bricks|int }} unid</h4>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="text-center p-3 bg-success bg-opacity-10 rounded">
+                            <i class="fas fa-plus-circle text-success fs-3 mb-2"></i>
+                            <h6 class="text-success mb-1">Com Desperdício</h6>
+                            <h4 class="mb-0">{{ result.num_bricks_with_waste|int }} unid</h4>
+                        </div>
+                    </div>
+                    
+                    <div class="col-12">
+                        <div class="text-center p-3 bg-info bg-opacity-10 rounded">
+                            <i class="fas fa-trowel text-info fs-3 mb-2"></i>
+                            <h6 class="text-info mb-1">Volume de Argamassa</h6>
+                            <h4 class="mb-0">{{ result.mortar_volume }} m³</h4>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-4">
+                    <h6 class="mb-3">Cálculo Utilizado:</h6>
+                    <div class="bg-dark text-white rounded p-3">
+                        <p class="mb-2"><strong>Método de Cálculo:</strong></p>
+                        <ul class="list-unstyled small mb-0">
+                            <li>• Área do tijolo + junta = (C + j) × (H + j)</li>
+                            <li>• Nº tijolos = Área parede ÷ Área tijolo+junta</li>
+                            <li>• Desperdício = 10% adicional</li>
+                            <li>• Volume argamassa estimado por área</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="card border-0 shadow-sm">
+            <div class="card-body text-center text-muted">
+                <i class="fas fa-th-large fs-1 mb-3"></i>
+                <h5>Aguardando Cálculo</h5>
+                <p>Preencha os dados da alvenaria e clique em "Calcular"</p>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Theory Section -->
+<div class="row mt-5">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-graduation-cap me-2"></i>Fundamentos da Alvenaria
+                </h5>
+            </div>
+            <div class="card-body">
+                <p>
+                    O cálculo de consumo de tijolos considera as dimensões dos tijolos, 
+                    a espessura das juntas de argamassa e inclui uma margem para desperdícios.
+                </p>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Considerações do Cálculo:</h6>
+                        <ul>
+                            <li>Dimensões padrão de tijolo cerâmico</li>
+                            <li>Junta de argamassa de 1,0 cm</li>
+                            <li>Desperdício de 10% nos tijolos</li>
+                            <li>Alvenaria de meio tijolo (espessura simples)</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <h6>Dimensões Típicas:</h6>
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Tipo</th>
+                                        <th>Comprimento</th>
+                                        <th>Altura</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>Tijolo comum</td>
+                                        <td>19 cm</td>
+                                        <td>9 cm</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Tijolo baiano</td>
+                                        <td>20 cm</td>
+                                        <td>10 cm</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Bloco cerâmico</td>
+                                        <td>30 cm</td>
+                                        <td>14 cm</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="alert alert-info mt-3">
+                    <i class="fas fa-info-circle me-2"></i>
+                    <strong>Dica:</strong> Para projetos executivos, considerar também quebras, 
+                    recortes especiais e variações dimensionais dos tijolos. O consumo pode variar 
+                    entre 10% a 15% dependendo da complexidade da obra.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

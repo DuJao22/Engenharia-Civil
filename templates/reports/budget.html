@@ -1,0 +1,218 @@
+{% extends "base.html" %}
+
+{% block title %}Relatório de Orçamento - {{ project.name }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <!-- Cabeçalho do Relatório -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-8">
+                        <h2 class="mb-1">{{ project.name }}</h2>
+                        <h4 class="text-muted mb-3">{{ budget.name }} - Versão {{ budget.version }}</h4>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p><strong>Cliente:</strong> {{ project.client_name or 'N/A' }}</p>
+                                <p><strong>Responsável Técnico:</strong> {{ project.technical_responsible or 'N/A' }}</p>
+                                <p><strong>CREA:</strong> {{ project.crea_number or 'N/A' }}</p>
+                            </div>
+                            <div class="col-md-6">
+                                <p><strong>Data de Início:</strong> {{ project.start_date.strftime('%d/%m/%Y') if project.start_date else 'N/A' }}</p>
+                                <p><strong>Data de Término:</strong> {{ project.end_date.strftime('%d/%m/%Y') if project.end_date else 'N/A' }}</p>
+                                <p><strong>Status:</strong> 
+                                    <span class="badge bg-{% if budget.status == 'rascunho' %}warning{% elif budget.status == 'revisao' %}primary{% else %}success{% endif %}">
+                                        {{ budget.status.title() }}
+                                    </span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 text-end">
+                        <div class="border p-3 bg-light">
+                            <h5>Informações do Relatório</h5>
+                            <p class="mb-1"><strong>Tipo:</strong> {{ report.report_type.title() }}</p>
+                            <p class="mb-1"><strong>Total de Itens:</strong> {{ report.items_count }}</p>
+                            <p class="mb-1"><strong>Gerado em:</strong> {{ report.generated_at }}</p>
+                            <p class="mb-0"><strong>Status:</strong> {{ report.status.replace('_', ' ').title() }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Resumo Financeiro -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-calculator me-2"></i>Resumo Financeiro</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-lg-3 col-md-6 mb-3">
+                        <div class="card bg-primary text-white">
+                            <div class="card-body text-center">
+                                <h4 class="mb-0">R$ {{ "%.2f"|format(budget.total_cost or 0) }}</h4>
+                                <small>Total do Orçamento</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6 mb-3">
+                        <div class="card bg-success text-white">
+                            <div class="card-body text-center">
+                                <h5 class="mb-0">{{ items|length }}</h5>
+                                <small>Total de Itens</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6 mb-3">
+                        <div class="card bg-info text-white">
+                            <div class="card-body text-center">
+                                <h5 class="mb-0">{{ "%.1f"|format(budget.profit_margin or 0) }}%</h5>
+                                <small>Margem de Lucro</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6 mb-3">
+                        <div class="card bg-warning text-white">
+                            <div class="card-body text-center">
+                                <h5 class="mb-0">{{ budget.created_at.strftime('%d/%m/%Y') }}</h5>
+                                <small>Data de Criação</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Itens Detalhados -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-list me-2"></i>Itens do Orçamento</h5>
+            </div>
+            <div class="card-body">
+                {% if items %}
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Item</th>
+                                <th>Descrição</th>
+                                <th>Categoria</th>
+                                <th>Quantidade</th>
+                                <th>Unidade</th>
+                                <th>Valor Unitário</th>
+                                <th>Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in items %}
+                            <tr>
+                                <td>{{ loop.index }}</td>
+                                <td>{{ item.description }}</td>
+                                <td>
+                                    <span class="badge bg-secondary">{{ item.category or 'N/A' }}</span>
+                                </td>
+                                <td>{{ "%.2f"|format(item.quantity) }}</td>
+                                <td>{{ item.unit }}</td>
+                                <td>R$ {{ "%.2f"|format(item.unit_cost) }}</td>
+                                <td><strong>R$ {{ "%.2f"|format(item.total_cost) }}</strong></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                        <tfoot>
+                            <tr class="table-primary">
+                                <th colspan="6" class="text-end">Total Geral:</th>
+                                <th>R$ {{ "%.2f"|format(budget.total_cost or 0) }}</th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-4">
+                    <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                    <h5 class="text-muted">Nenhum item no orçamento</h5>
+                    <p class="text-muted">Este orçamento ainda não possui itens cadastrados.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Observações -->
+        {% if budget.description %}
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-comment me-2"></i>Observações</h5>
+            </div>
+            <div class="card-body">
+                <p class="mb-0">{{ budget.description }}</p>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Ações -->
+        <div class="d-flex justify-content-between mb-4">
+            <a href="{{ url_for('budget_detail', project_id=project.id, budget_id=budget.id) }}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-1"></i>Voltar ao Orçamento
+            </a>
+            <div>
+                <button class="btn btn-primary me-2" onclick="window.print()">
+                    <i class="fas fa-print me-1"></i>Imprimir Relatório
+                </button>
+                <button class="btn btn-success" onclick="exportToPDF()">
+                    <i class="fas fa-file-pdf me-1"></i>Exportar PDF
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function exportToPDF() {
+    const url = `/reports/budget/{{ project.id }}/{{ budget.id }}/pdf`;
+    
+    // Criar um link temporário para download
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `orcamento_{{ project.name }}_{{ budget.name }}.pdf`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
+// Configurar estilos para impressão
+window.addEventListener('beforeprint', function() {
+    document.body.classList.add('printing');
+});
+
+window.addEventListener('afterprint', function() {
+    document.body.classList.remove('printing');
+});
+</script>
+
+<style>
+@media print {
+    .btn, .card-header, nav, footer {
+        display: none !important;
+    }
+    
+    .card {
+        border: none !important;
+        box-shadow: none !important;
+    }
+    
+    .card-body {
+        padding: 0 !important;
+    }
+    
+    .table {
+        font-size: 12px;
+    }
+    
+    body.printing {
+        font-size: 12px;
+    }
+}
+</style>
+{% endblock %}

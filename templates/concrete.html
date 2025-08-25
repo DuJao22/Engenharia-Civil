@@ -1,0 +1,210 @@
+{% extends "base.html" %}
+
+{% block title %}Concreto Armado - Sistema de Engenharia Civil{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h1>
+            <i class="fas fa-industry me-2"></i>Concreto Armado
+        </h1>
+        <p class="text-muted">Dimensionamento de vigas em concreto armado conforme NBR 6118</p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-6">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-ruler-combined me-2"></i>Dados da Seção
+                </h5>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    {{ form.hidden_tag() }}
+                    
+                    <div class="mb-3">
+                        {{ form.name.label(class="form-label") }}
+                        {{ form.name(class="form-control" + (" is-invalid" if form.name.errors else "")) }}
+                        {% if form.name.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.name.errors %}{{ error }}{% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            {{ form.width.label(class="form-label") }}
+                            {{ form.width(class="form-control" + (" is-invalid" if form.width.errors else "")) }}
+                            {% if form.width.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.width.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            {{ form.height.label(class="form-label") }}
+                            {{ form.height(class="form-control" + (" is-invalid" if form.height.errors else "")) }}
+                            {% if form.height.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.height.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form.moment.label(class="form-label") }}
+                        {{ form.moment(class="form-control" + (" is-invalid" if form.moment.errors else "")) }}
+                        {% if form.moment.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.moment.errors %}{{ error }}{% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            {{ form.fck.label(class="form-label") }}
+                            {{ form.fck(class="form-control" + (" is-invalid" if form.fck.errors else ""), value="25") }}
+                            {% if form.fck.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.fck.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            {{ form.fyk.label(class="form-label") }}
+                            {{ form.fyk(class="form-control" + (" is-invalid" if form.fyk.errors else ""), value="500") }}
+                            {% if form.fyk.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.fyk.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="d-grid">
+                        {{ form.submit(class="btn btn-success btn-lg") }}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-6">
+        {% if result %}
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-check-circle me-2"></i>Resultados do Dimensionamento
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-12">
+                        <div class="bg-dark text-white rounded p-3">
+                            <h6 class="text-success mb-2">
+                                <i class="fas fa-cog me-1"></i>Parâmetros de Cálculo
+                            </h6>
+                            <div class="row">
+                                <div class="col-6">
+                                    <small>
+                                        <strong>f<sub>cd</sub>:</strong> {{ result.fcd }} MPa<br>
+                                        <strong>f<sub>yd</sub>:</strong> {{ result.fyd }} MPa
+                                    </small>
+                                </div>
+                                <div class="col-6">
+                                    <small>
+                                        <strong>d<sub>útil</sub>:</strong> {{ result.effective_depth }} cm
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="text-center p-3 bg-success bg-opacity-10 rounded">
+                            <i class="fas fa-weight-hanging text-success fs-3 mb-2"></i>
+                            <h6 class="text-success mb-1">A<sub>s</sub> Necessária</h6>
+                            <h4 class="mb-0">{{ result.As_required }} mm²</h4>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="text-center p-3 bg-warning bg-opacity-10 rounded">
+                            <i class="fas fa-ruler text-warning fs-3 mb-2"></i>
+                            <h6 class="text-warning mb-1">A<sub>s</sub> Mínima</h6>
+                            <h4 class="mb-0">{{ result.As_min }} mm²</h4>
+                        </div>
+                    </div>
+                    
+                    <div class="col-12">
+                        <div class="text-center p-3 bg-primary bg-opacity-10 rounded">
+                            <i class="fas fa-check-double text-primary fs-3 mb-2"></i>
+                            <h6 class="text-primary mb-1">A<sub>s</sub> Adotada</h6>
+                            <h3 class="mb-1 text-primary">{{ result.As_final }} mm²</h3>
+                            <small class="text-muted">Taxa de armadura: {{ result.steel_ratio }}%</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-4">
+                    <h6 class="mb-3">Método de Cálculo:</h6>
+                    <div class="bg-dark text-white rounded p-3">
+                        <p class="mb-2"><strong>Hipóteses simplificadas:</strong></p>
+                        <ul class="list-unstyled small text-muted mb-0">
+                            <li>• Braço de alavanca z = 0,9d</li>
+                            <li>• A<sub>s</sub> = M<sub>sd</sub> / (f<sub>yd</sub> × z)</li>
+                            <li>• A<sub>s,min</sub> = 0,15% × b × h</li>
+                            <li>• Adotado o maior valor entre A<sub>s</sub> e A<sub>s,min</sub></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="card border-0 shadow-sm">
+            <div class="card-body text-center text-muted">
+                <i class="fas fa-industry fs-1 mb-3"></i>
+                <h5>Aguardando Dimensionamento</h5>
+                <p>Preencha os dados da seção e clique em "Calcular"</p>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Theory Section -->
+<div class="row mt-5">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-graduation-cap me-2"></i>Norma e Metodologia
+                </h5>
+            </div>
+            <div class="card-body">
+                <p>
+                    Este módulo utiliza uma metodologia simplificada baseada na NBR 6118:2014 
+                    para o dimensionamento de vigas de concreto armado à flexão simples.
+                </p>
+                <h6>Considerações:</h6>
+                <ul>
+                    <li>Flexão simples com compressão no concreto e tração no aço</li>
+                    <li>Cobrimento nominal adotado de 5,0 cm</li>
+                    <li>Método simplificado com braço de alavanca constante</li>
+                    <li>Armadura mínima de 0,15% da área da seção transversal</li>
+                </ul>
+                <div class="alert alert-warning mt-3">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <strong>Atenção:</strong> Para projetos executivos, realizar verificação completa 
+                    incluindo Estado Limite de Serviço (ELS), verificação de fissuração e deflexões.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

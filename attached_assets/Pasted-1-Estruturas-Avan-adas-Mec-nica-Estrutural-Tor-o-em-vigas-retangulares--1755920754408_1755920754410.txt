@@ -1,0 +1,336 @@
+1️⃣ Estruturas Avançadas / Mecânica Estrutural
+
+Torção em vigas retangulares:
+
+𝜏
+𝑚
+𝑎
+𝑥
+=
+𝑇
+⋅
+𝑐
+𝐽
+τ
+max
+	​
+
+=
+J
+T⋅c
+	​
+
+
+T = torque, c = distância ao centroide, J = momento polar de inércia.
+
+Fator de flambagem de pilares (Euler):
+
+𝑃
+𝑐
+𝑟
+=
+𝜋
+2
+𝐸
+𝐼
+(
+𝐾
+𝐿
+)
+2
+P
+cr
+	​
+
+=
+(KL)
+2
+π
+2
+EI
+	​
+
+
+K = fator de extremidades (apoiadas, engastadas), L = comprimento do pilar.
+
+Vigas contínuas (momento negativo em apoio):
+
+𝑀
+𝑛
+𝑒
+𝑔
+=
+𝑤
+𝐿
+2
+12
+(
+aprox.
+)
+M
+neg
+	​
+
+=
+12
+wL
+2
+	​
+
+(aprox.)
+2️⃣ Hidrologia e Recursos Hídricos
+
+Tempo de concentração da bacia:
+
+𝑡
+𝑐
+=
+𝐾
+⋅
+𝐿
+0.8
+𝑆
+−
+0.5
+t
+c
+	​
+
+=K⋅L
+0.8
+S
+−0.5
+
+L = comprimento do fluxo, S = declividade, K = constante do método (NRCS ou Kirpich).
+
+Vazão de detenção / reservatórios:
+
+𝑄
+𝑜
+𝑢
+𝑡
+=
+𝑄
+𝑖
+𝑛
+−
+𝑑
+𝑉
+𝑑
+𝑡
+Q
+out
+	​
+
+=Q
+in
+	​
+
+−
+dt
+dV
+	​
+
+3️⃣ Estruturas Metálicas
+
+Tensão em barra tracionada/comprimida:
+
+𝜎
+=
+𝐹
+𝐴
+σ=
+A
+F
+	​
+
+
+Deflexão de vigas metálicas:
+
+𝛿
+𝑚
+𝑎
+𝑥
+=
+𝑃
+𝐿
+3
+48
+𝐸
+𝐼
+(carga central)
+δ
+max
+	​
+
+=
+48EI
+PL
+3
+	​
+
+(carga central)
+
+Cálculo de conectores e parafusos: normas NBR 8800.
+
+4️⃣ Construção Industrial / Pré-moldados
+
+Elementos pré-moldados: cálculo de momento fletor, carga distribuída, flechas máximas.
+
+Lajes nervuradas:
+
+𝐼
+𝑒
+𝑓
+=
+𝐼
+𝑛
+𝑒
+𝑟
+𝑣
+𝑢
+𝑟
+𝑎
++
+𝐼
+𝑎
+𝑙
+𝑚
+𝑎
++
+momentos de in
+e
+ˊ
+rcia compostos
+I
+ef
+	​
+
+=I
+nervura
+	​
+
++I
+alma
+	​
+
++momentos de in
+e
+ˊ
+rcia compostos
+5️⃣ Instalações Prediais
+
+Dimensionamento de rede elétrica baixa tensão (corrente e queda de tensão):
+
+Δ
+𝑉
+=
+𝐼
+⋅
+𝑅
+⋅
+𝐿
+ΔV=I⋅R⋅L
+
+Rede de gás ou água quente: perda de carga com tubos metálicos ou PVC, curvas de cálculo com Hazen-Williams.
+
+6️⃣ Controle de Obras e Produtividade
+
+Produtividade da equipe:
+
+𝑃
+𝑟
+𝑜
+𝑑
+=
+𝑄
+𝑡
+𝑑
+ executada
+𝑇
+𝑒
+𝑚
+𝑝
+𝑜
+𝑔
+𝑎
+𝑠
+𝑡
+𝑜
+Prod=
+Tempogasto
+Qtd executada
+	​
+
+
+Curva S de obra (financeiro x tempo):
+
+𝐶
+(
+𝑡
+)
+=
+𝐶
+𝑡
+𝑜
+𝑡
+𝑎
+𝑙
+⋅
+𝑓
+(
+𝑡
+)
+onde 
+𝑓
+(
+𝑡
+)
+=
+percentual acumulado da obra
+C(t)=C
+total
+	​
+
+⋅f(t)onde f(t)=percentual acumulado da obra
+7️⃣ Sustentabilidade e Energia
+
+Cálculo de pegada de carbono de materiais:
+
+𝐶
+𝑂
+2
+=
+𝑚
+⋅
+𝐹
+CO
+2
+	​
+
+=m⋅F
+
+m = massa do material, F = fator de emissão do material.
+
+Cálculo de eficiência energética de edificações:
+
+𝑄
+𝑝
+𝑒
+𝑟
+𝑑
+𝑎
+=
+𝑈
+⋅
+𝐴
+⋅
+Δ
+𝑇
+Q
+perda
+	​
+
+=U⋅A⋅ΔT
+
+U = coeficiente global de transmissão térmica, A = área, ΔT = diferença de temperatura.

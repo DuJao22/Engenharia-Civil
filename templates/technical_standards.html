@@ -1,0 +1,541 @@
+{% extends "base.html" %}
+
+{% block title %}Biblioteca de Normas Técnicas - Sistema de Engenharia Civil{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1><i class="fas fa-book me-2"></i>Biblioteca de Normas Técnicas</h1>
+            <span class="badge bg-info">NBRs Atualizadas</span>
+        </div>
+    </div>
+</div>
+
+<!-- Filtros de Busca -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <input type="text" class="form-control" id="searchStandard" placeholder="Buscar norma por código ou descrição...">
+                    </div>
+                    <div class="col-md-4">
+                        <select class="form-select" id="filterCategory">
+                            <option value="">Todas as categorias</option>
+                            <option value="structural">Estrutural</option>
+                            <option value="concrete">Concreto</option>
+                            <option value="foundation">Fundações</option>
+                            <option value="hydraulic">Hidráulica</option>
+                            <option value="fire">Segurança Contra Incêndio</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <button class="btn btn-primary w-100" onclick="filterStandards()">
+                            <i class="fas fa-search me-1"></i>Buscar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Normas por Categoria -->
+<div class="row">
+    <!-- Normas Estruturais -->
+    <div class="col-12 mb-4">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="fas fa-building me-2"></i>Normas Estruturais</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-lg-6 mb-3">
+                        <div class="border rounded p-3 h-100">
+                            <h6 class="text-primary">NBR 6118:2014</h6>
+                            <p class="mb-2"><strong>Projeto de estruturas de concreto — Procedimento</strong></p>
+                            <p class="text-muted small mb-2">
+                                Estabelece os requisitos básicos exigíveis para projeto de estruturas de concreto simples, armado e protendido.
+                            </p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="badge bg-success">Vigente</span>
+                                <div>
+                                    <button class="btn btn-outline-primary btn-sm" onclick="viewStandard('NBR6118')">
+                                        <i class="fas fa-eye me-1"></i>Ver Resumo
+                                    </button>
+                                    <a href="#" class="btn btn-outline-secondary btn-sm">
+                                        <i class="fas fa-download me-1"></i>PDF
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-6 mb-3">
+                        <div class="border rounded p-3 h-100">
+                            <h6 class="text-primary">NBR 8800:2008</h6>
+                            <p class="mb-2"><strong>Projeto de estruturas de aço e de estruturas mistas de aço e concreto</strong></p>
+                            <p class="text-muted small mb-2">
+                                Estabelece os requisitos para o projeto de estruturas de aço e estruturas mistas de aço e concreto de edifícios.
+                            </p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="badge bg-success">Vigente</span>
+                                <div>
+                                    <button class="btn btn-outline-primary btn-sm" onclick="viewStandard('NBR8800')">
+                                        <i class="fas fa-eye me-1"></i>Ver Resumo
+                                    </button>
+                                    <a href="#" class="btn btn-outline-secondary btn-sm">
+                                        <i class="fas fa-download me-1"></i>PDF
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-6 mb-3">
+                        <div class="border rounded p-3 h-100">
+                            <h6 class="text-primary">NBR 6123:1988</h6>
+                            <p class="mb-2"><strong>Forças devidas ao vento em edificações</strong></p>
+                            <p class="text-muted small mb-2">
+                                Fixa as condições exigíveis na consideração das forças devidas à ação do vento para efeito de cálculo de edificações.
+                            </p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="badge bg-warning">Em revisão</span>
+                                <div>
+                                    <button class="btn btn-outline-primary btn-sm" onclick="viewStandard('NBR6123')">
+                                        <i class="fas fa-eye me-1"></i>Ver Resumo
+                                    </button>
+                                    <a href="#" class="btn btn-outline-secondary btn-sm">
+                                        <i class="fas fa-download me-1"></i>PDF
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-6 mb-3">
+                        <div class="border rounded p-3 h-100">
+                            <h6 class="text-primary">NBR 15421:2006</h6>
+                            <p class="mb-2"><strong>Projeto de estruturas resistentes a sismos</strong></p>
+                            <p class="text-muted small mb-2">
+                                Estabelece os requisitos mínimos para o projeto de estruturas resistentes a sismos.
+                            </p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="badge bg-success">Vigente</span>
+                                <div>
+                                    <button class="btn btn-outline-primary btn-sm" onclick="viewStandard('NBR15421')">
+                                        <i class="fas fa-eye me-1"></i>Ver Resumo
+                                    </button>
+                                    <a href="#" class="btn btn-outline-secondary btn-sm">
+                                        <i class="fas fa-download me-1"></i>PDF
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Normas de Fundações -->
+    <div class="col-12 mb-4">
+        <div class="card">
+            <div class="card-header bg-warning text-dark">
+                <h5 class="mb-0"><i class="fas fa-home me-2"></i>Normas de Fundações</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-lg-6 mb-3">
+                        <div class="border rounded p-3 h-100">
+                            <h6 class="text-primary">NBR 6122:2019</h6>
+                            <p class="mb-2"><strong>Projeto e execução de fundações</strong></p>
+                            <p class="text-muted small mb-2">
+                                Estabelece os requisitos exigíveis para projeto e execução de fundações de obras de engenharia.
+                            </p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="badge bg-success">Vigente</span>
+                                <div>
+                                    <button class="btn btn-outline-primary btn-sm" onclick="viewStandard('NBR6122')">
+                                        <i class="fas fa-eye me-1"></i>Ver Resumo
+                                    </button>
+                                    <a href="#" class="btn btn-outline-secondary btn-sm">
+                                        <i class="fas fa-download me-1"></i>PDF
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-6 mb-3">
+                        <div class="border rounded p-3 h-100">
+                            <h6 class="text-primary">NBR 12131:2018</h6>
+                            <p class="mb-2"><strong>Estacas — Prova de carga estática — Método de ensaio</strong></p>
+                            <p class="text-muted small mb-2">
+                                Prescreve o método para execução de prova de carga estática axial em estacas isoladas.
+                            </p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="badge bg-success">Vigente</span>
+                                <div>
+                                    <button class="btn btn-outline-primary btn-sm" onclick="viewStandard('NBR12131')">
+                                        <i class="fas fa-eye me-1"></i>Ver Resumo
+                                    </button>
+                                    <a href="#" class="btn btn-outline-secondary btn-sm">
+                                        <i class="fas fa-download me-1"></i>PDF
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Normas Hidráulicas -->
+    <div class="col-12 mb-4">
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0"><i class="fas fa-tint me-2"></i>Normas Hidráulicas e Sanitárias</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-lg-6 mb-3">
+                        <div class="border rounded p-3 h-100">
+                            <h6 class="text-primary">NBR 5626:2020</h6>
+                            <p class="mb-2"><strong>Instalação predial de água fria</strong></p>
+                            <p class="text-muted small mb-2">
+                                Estabelece exigências e recomendações relativas ao projeto, execução e manutenção da instalação predial de água fria.
+                            </p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="badge bg-success">Vigente</span>
+                                <div>
+                                    <button class="btn btn-outline-primary btn-sm" onclick="viewStandard('NBR5626')">
+                                        <i class="fas fa-eye me-1"></i>Ver Resumo
+                                    </button>
+                                    <a href="#" class="btn btn-outline-secondary btn-sm">
+                                        <i class="fas fa-download me-1"></i>PDF
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-6 mb-3">
+                        <div class="border rounded p-3 h-100">
+                            <h6 class="text-primary">NBR 8160:1999</h6>
+                            <p class="mb-2"><strong>Sistemas prediais de esgoto sanitário</strong></p>
+                            <p class="text-muted small mb-2">
+                                Estabelece exigências e recomendações relativas ao projeto, execução, ensaio e manutenção dos sistemas prediais de esgoto sanitário.
+                            </p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="badge bg-warning">Em revisão</span>
+                                <div>
+                                    <button class="btn btn-outline-primary btn-sm" onclick="viewStandard('NBR8160')">
+                                        <i class="fas fa-eye me-1"></i>Ver Resumo
+                                    </button>
+                                    <a href="#" class="btn btn-outline-secondary btn-sm">
+                                        <i class="fas fa-download me-1"></i>PDF
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para Visualização de Norma -->
+<div class="modal fade" id="standardModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="standardModalTitle">Detalhes da Norma</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="standardModalBody">
+                <!-- Conteúdo será carregado via JavaScript -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                <button type="button" class="btn btn-primary">Download PDF</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const standardsDetails = {
+    'NBR6118': {
+        title: 'NBR 6118:2014 - Projeto de estruturas de concreto',
+        content: `
+            <h6>Principais Seções:</h6>
+            <ul>
+                <li><strong>Seção 1:</strong> Objeto e campo de aplicação</li>
+                <li><strong>Seção 2:</strong> Referências normativas</li>
+                <li><strong>Seção 3:</strong> Termos e definições</li>
+                <li><strong>Seção 4:</strong> Símbolos</li>
+                <li><strong>Seção 5:</strong> Requisitos gerais</li>
+                <li><strong>Seção 6:</strong> Diretrizes para durabilidade</li>
+                <li><strong>Seção 7:</strong> Ações e segurança</li>
+                <li><strong>Seção 8:</strong> Propriedades dos materiais</li>
+                <li><strong>Seção 9:</strong> Comportamento conjunto dos materiais</li>
+                <li><strong>Seção 10:</strong> Segurança e estados limites</li>
+            </ul>
+            <h6>Valores Importantes:</h6>
+            <ul>
+                <li><strong>Cobrimento mínimo:</strong> 15mm a 50mm (conforme classe de agressividade)</li>
+                <li><strong>Resistência característica mínima:</strong> fck ≥ 20 MPa</li>
+                <li><strong>Coeficientes de segurança:</strong> γc = 1,4 (concreto), γs = 1,15 (aço)</li>
+                <li><strong>Módulo de elasticidade:</strong> Eci = αE × 5600 × √fck</li>
+                <li><strong>Armadura mínima:</strong> As,min = 0,15% × Ac</li>
+            </ul>
+            <h6>Classes de Agressividade:</h6>
+            <ul>
+                <li><strong>CAA I:</strong> Fraca - Rural, submersa</li>
+                <li><strong>CAA II:</strong> Moderada - Urbana</li>
+                <li><strong>CAA III:</strong> Forte - Marinha, industrial</li>
+                <li><strong>CAA IV:</strong> Muito forte - Industrial agressiva, respingos de maré</li>
+            </ul>
+        `
+    },
+    'NBR8800': {
+        title: 'NBR 8800:2008 - Projeto de estruturas de aço',
+        content: `
+            <h6>Principais Tópicos:</h6>
+            <ul>
+                <li><strong>Seção 4:</strong> Bases de cálculo e verificações de segurança</li>
+                <li><strong>Seção 5:</strong> Propriedades dos materiais</li>
+                <li><strong>Seção 6:</strong> Dimensionamento de barras</li>
+                <li><strong>Seção 7:</strong> Dimensionamento de ligações</li>
+                <li><strong>Seção 8:</strong> Estados limites de utilização</li>
+                <li><strong>Seção 9:</strong> Fadiga</li>
+            </ul>
+            <h6>Coeficientes de Segurança:</h6>
+            <ul>
+                <li><strong>γa1 = 1,10:</strong> Resistência ao escoamento do aço</li>
+                <li><strong>γa2 = 1,35:</strong> Resistência à ruptura do aço</li>
+                <li><strong>γc = 1,40:</strong> Resistência do concreto</li>
+            </ul>
+            <h6>Aços Estruturais:</h6>
+            <ul>
+                <li><strong>ASTM A36:</strong> fy = 250 MPa, fu = 400 MPa</li>
+                <li><strong>ASTM A572 Gr50:</strong> fy = 345 MPa, fu = 450 MPa</li>
+                <li><strong>ASTM A992:</strong> fy = 345 MPa, fu = 450 MPa</li>
+            </ul>
+        `
+    },
+    'NBR6123': {
+        title: 'NBR 6123:1988 - Forças devidas ao vento em edificações',
+        content: `
+            <h6>Velocidade Básica do Vento (V0):</h6>
+            <ul>
+                <li><strong>Região Sul/Sudeste:</strong> 30 a 50 m/s</li>
+                <li><strong>Região Nordeste:</strong> 25 a 35 m/s</li>
+                <li><strong>Região Norte:</strong> 25 a 30 m/s</li>
+            </ul>
+            <h6>Fatores de Correção:</h6>
+            <ul>
+                <li><strong>S1:</strong> Fator topográfico (0,85 a 1,0)</li>
+                <li><strong>S2:</strong> Fator de rugosidade e altura</li>
+                <li><strong>S3:</strong> Fator estatístico (0,88 a 1,0)</li>
+            </ul>
+            <h6>Pressão Dinâmica:</h6>
+            <ul>
+                <li><strong>q = 0,613 × Vk²</strong> (N/m²)</li>
+                <li><strong>Vk = V0 × S1 × S2 × S3</strong></li>
+            </ul>
+            <h6>Categorias de Rugosidade:</h6>
+            <ul>
+                <li><strong>Cat. I:</strong> Superfícies lisas (mar aberto)</li>
+                <li><strong>Cat. II:</strong> Terrenos abertos poucos obstáculos</li>
+                <li><strong>Cat. III:</strong> Terrenos planos com obstáculos</li>
+                <li><strong>Cat. IV:</strong> Terrenos cobertos com obstáculos</li>
+                <li><strong>Cat. V:</strong> Florestas e centros urbanos densos</li>
+            </ul>
+        `
+    },
+    'NBR15421': {
+        title: 'NBR 15421:2006 - Projeto de estruturas resistentes a sismos',
+        content: `
+            <h6>Zonamento Sísmico do Brasil:</h6>
+            <ul>
+                <li><strong>Zona 0:</strong> Aceleração sísmica muito baixa (ag ≤ 0,025g)</li>
+                <li><strong>Zona 1:</strong> Aceleração sísmica baixa (0,025g < ag ≤ 0,050g)</li>
+                <li><strong>Zona 2:</strong> Aceleração sísmica moderada (0,050g < ag ≤ 0,100g)</li>
+                <li><strong>Zona 3:</strong> Aceleração sísmica alta (0,100g < ag ≤ 0,150g)</li>
+                <li><strong>Zona 4:</strong> Aceleração sísmica muito alta (ag > 0,150g)</li>
+            </ul>
+            <h6>Fatores de Comportamento:</h6>
+            <ul>
+                <li><strong>Concreto armado:</strong> q = 1,5 a 3,5</li>
+                <li><strong>Aço:</strong> q = 1,5 a 4,0</li>
+                <li><strong>Alvenaria estrutural:</strong> q = 1,5 a 2,5</li>
+            </ul>
+            <h6>Classes de Importância:</h6>
+            <ul>
+                <li><strong>Classe I:</strong> Edificações residenciais comuns (γI = 1,0)</li>
+                <li><strong>Classe II:</strong> Edificações comerciais/industriais (γI = 1,2)</li>
+                <li><strong>Classe III:</strong> Edificações essenciais (γI = 1,4)</li>
+            </ul>
+        `
+    },
+    'NBR6122': {
+        title: 'NBR 6122:2019 - Projeto e execução de fundações',
+        content: `
+            <h6>Tipos de Fundações:</h6>
+            <ul>
+                <li><strong>Fundações superficiais:</strong> sapatas, blocos, radier, sapatas corridas</li>
+                <li><strong>Fundações profundas:</strong> estacas (pré-moldadas, moldadas in loco), tubulões</li>
+            </ul>
+            <h6>Fatores de Segurança:</h6>
+            <ul>
+                <li><strong>Fundações superficiais:</strong> FS ≥ 3,0</li>
+                <li><strong>Estacas (carga de trabalho):</strong> FS ≥ 2,0</li>
+                <li><strong>Tubulões:</strong> FS ≥ 3,0</li>
+                <li><strong>Capacidade de carga do solo:</strong> FS ≥ 3,0</li>
+            </ul>
+            <h6>Investigações Geotécnicas:</h6>
+            <ul>
+                <li><strong>SPT:</strong> Standard Penetration Test (mais comum)</li>
+                <li><strong>CPT:</strong> Cone Penetration Test</li>
+                <li><strong>Ensaios de laboratório:</strong> granulometria, limites, compressão</li>
+            </ul>
+            <h6>Capacidade de Carga (Terzaghi):</h6>
+            <ul>
+                <li><strong>qc = c×Nc + γ×D×Nq + 0,5×γ×B×Nγ</strong></li>
+                <li><strong>Nc, Nq, Nγ:</strong> Fatores de capacidade de carga</li>
+            </ul>
+        `
+    },
+    'NBR12131': {
+        title: 'NBR 12131:2018 - Estacas — Prova de carga estática',
+        content: `
+            <h6>Tipos de Ensaio:</h6>
+            <ul>
+                <li><strong>Ensaio lento (SML):</strong> Slow Maintained Load</li>
+                <li><strong>Ensaio rápido (QML):</strong> Quick Maintained Load</li>
+                <li><strong>Ensaio de tração:</strong> Para estacas submetidas a esforços de tração</li>
+            </ul>
+            <h6>Critérios de Interpretação:</h6>
+            <ul>
+                <li><strong>Critério da carga limite:</strong> Recalque = D/30 (sapatas) ou 30mm (estacas)</li>
+                <li><strong>Van der Veen:</strong> Extrapolação da curva carga-recalque</li>
+                <li><strong>Davisson:</strong> Reta com inclinação específica</li>
+            </ul>
+            <h6>Estágios de Carregamento:</h6>
+            <ul>
+                <li><strong>Ensaio lento:</strong> 12 estágios mínimo, 30 min por estágio</li>
+                <li><strong>Ensaio rápido:</strong> 15 estágios mínimo, 10 min por estágio</li>
+                <li><strong>Carga máxima:</strong> 200% da carga de trabalho prevista</li>
+            </ul>
+            <h6>Sistema de Reação:</h6>
+            <ul>
+                <li><strong>Estacas de reação:</strong> Mínimo 5D de distância</li>
+                <li><strong>Peso morto:</strong> Blocos de concreto ou vergalhões</li>
+                <li><strong>Cargueira:</strong> Vigas metálicas para distribuição</li>
+            </ul>
+        `
+    },
+    'NBR5626': {
+        title: 'NBR 5626:2020 - Instalação predial de água fria',
+        content: `
+            <h6>Pressões de Serviço:</h6>
+            <ul>
+                <li><strong>Pressão estática máxima:</strong> 400 kPa (40 mca)</li>
+                <li><strong>Pressão dinâmica mínima:</strong> 10 kPa (1 mca)</li>
+                <li><strong>Pressão nos pontos de utilização:</strong> 5 a 40 mca</li>
+            </ul>
+            <h6>Velocidades Limites:</h6>
+            <ul>
+                <li><strong>Tubos de PVC:</strong> 2,5 m/s</li>
+                <li><strong>Tubos metálicos:</strong> 3,0 m/s</li>
+                <li><strong>Alimentador predial:</strong> 2,0 m/s</li>
+            </ul>
+            <h6>Materiais para Tubulações:</h6>
+            <ul>
+                <li><strong>PVC rígido:</strong> Mais econômico, fácil instalação</li>
+                <li><strong>Cobre:</strong> Durabilidade, resistência a temperatura</li>
+                <li><strong>PPR:</strong> Resistente a temperaturas elevadas</li>
+                <li><strong>PEX:</strong> Flexível, resistente a incrustações</li>
+            </ul>
+            <h6>Cálculo de Consumo:</h6>
+            <ul>
+                <li><strong>Residencial:</strong> 150 L/hab.dia</li>
+                <li><strong>Escritórios:</strong> 50 L/pessoa.dia</li>
+                <li><strong>Escolas:</strong> 50 L/pessoa.dia</li>
+                <li><strong>Hospitais:</strong> 250 L/leito.dia</li>
+            </ul>
+        `
+    },
+    'NBR8160': {
+        title: 'NBR 8160:1999 - Sistemas prediais de esgoto sanitário',
+        content: `
+            <h6>Diâmetros Mínimos:</h6>
+            <ul>
+                <li><strong>Ramal de descarga:</strong> DN 40 (lavatórios), DN 50 (pias), DN 100 (bacias)</li>
+                <li><strong>Ramal de esgoto:</strong> DN 50 mínimo</li>
+                <li><strong>Tubo de queda:</strong> DN 75 mínimo</li>
+                <li><strong>Coletor predial:</strong> DN 100 mínimo</li>
+            </ul>
+            <h6>Declividades Mínimas:</h6>
+            <ul>
+                <li><strong>DN 50:</strong> 2,5% (1:40)</li>
+                <li><strong>DN 75:</strong> 2,0% (1:50)</li>
+                <li><strong>DN 100:</strong> 1,0% (1:100)</li>
+                <li><strong>DN 150:</strong> 0,67% (1:150)</li>
+            </ul>
+            <h6>Ventilação:</h6>
+            <ul>
+                <li><strong>Tubo ventilador primário:</strong> Prolongamento do tubo de queda</li>
+                <li><strong>Tubo ventilador secundário:</strong> Ligado ao primário</li>
+                <li><strong>Altura mínima:</strong> 30 cm acima da cobertura</li>
+            </ul>
+            <h6>Caixas e Dispositivos:</h6>
+            <ul>
+                <li><strong>Caixa sifonada:</strong> 150x150x50mm mínimo</li>
+                <li><strong>Caixa de gordura:</strong> Capacidade mínima 18L</li>
+                <li><strong>Caixa de inspeção:</strong> 60x60cm mínimo</li>
+            </ul>
+        `
+    }
+};
+
+function viewStandard(standardId) {
+    const standard = standardsDetails[standardId];
+    if (standard) {
+        document.getElementById('standardModalTitle').textContent = standard.title;
+        document.getElementById('standardModalBody').innerHTML = standard.content;
+        
+        const modal = new bootstrap.Modal(document.getElementById('standardModal'));
+        modal.show();
+    } else {
+        alert('Detalhes da norma em desenvolvimento');
+    }
+}
+
+function filterStandards() {
+    const searchTerm = document.getElementById('searchStandard').value.toLowerCase();
+    const categoryFilter = document.getElementById('filterCategory').value;
+    
+    // Implementar filtro das normas
+    console.log('Filtrar:', searchTerm, categoryFilter);
+    alert('Funcionalidade de filtro em desenvolvimento');
+}
+
+// Filtro em tempo real
+document.getElementById('searchStandard').addEventListener('input', function() {
+    // Implementar busca em tempo real
+});
+
+document.getElementById('filterCategory').addEventListener('change', function() {
+    // Implementar filtro por categoria
+});
+</script>
+{% endblock %}

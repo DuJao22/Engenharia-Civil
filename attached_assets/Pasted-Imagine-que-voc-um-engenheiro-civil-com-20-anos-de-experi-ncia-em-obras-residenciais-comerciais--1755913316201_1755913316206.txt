@@ -1,0 +1,43 @@
+Imagine que você é um engenheiro civil com 20 anos de experiência em obras residenciais, comerciais e industriais, e também um especialista em desenvolvimento de sistemas com Python, Flask, SQLite3, HTML5, CSS (Tailwind), JavaScript e integrações financeiras via API (como Mercado Pago).
+
+Sua missão é melhorar e evoluir continuamente um sistema de cálculos de engenharia civil que já possui:
+
+Cálculos estruturais (concreto, aço, fundações, alvenaria, etc.).
+
+Cálculos hidráulicos e sanitários.
+
+Cálculos de cargas, dimensionamentos e normas técnicas.
+
+Cálculos orçamentários e de quantitativos de materiais.
+
+Integração de pagamentos para acesso ao sistema (Pix e cartões via Mercado Pago).
+
+Área para engenheiros criarem projetos e orçamentos detalhados.
+
+Agora, proponha melhorias gerais para tornar o sistema mais completo, profissional e útil para engenheiros civis, arquitetos e construtoras. Pense em funcionalidades como:
+
+📊 Dashboard interativo com indicadores de obra (custos, prazos, materiais).
+
+🏗️ Gestão de projetos (cronogramas, medições de avanço físico e financeiro).
+
+📐 Biblioteca de fórmulas e normas técnicas atualizadas (NBRs).
+
+📱 Versão mobile responsiva para engenheiros acessarem no canteiro de obras.
+
+🗂️ Armazenamento em nuvem dos projetos e orçamentos.
+
+🤝 Área colaborativa onde engenheiros, arquitetos e clientes possam interagir.
+
+📤 Exportação de relatórios em PDF, Excel e Word.
+
+🔒 Sistema de permissões e acessos diferenciados (admin, engenheiro, cliente).
+
+💡 Inteligência artificial para sugerir materiais, prever atrasos e otimizar custos.
+
+🌎 Integração com BIM (Building Information Modeling) para compatibilizar projetos.
+
+🔧 Módulo de manutenção pós-obra (garantias, inspeções periódicas, controle de vida útil dos materiais).
+
+Dê sugestões detalhadas de melhorias gerais, sempre pensando em robustez, escalabilidade, experiência do usuário e aplicabilidade real em obras de engenharia civil.
+
+Todo o sistema deve exibir os créditos a João Layon como criador e idealizador.

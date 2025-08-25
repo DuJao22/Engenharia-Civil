@@ -1,0 +1,437 @@
+{% extends "base.html" %}
+
+{% block title %}Histórico de Cálculos - Sistema de Engenharia Civil{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h1>
+            <i class="fas fa-history me-2"></i>Histórico de Cálculos
+        </h1>
+        <p class="text-muted">Visualize e gerencie seus cálculos salvos</p>
+    </div>
+</div>
+
+<!-- Statistics Cards -->
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body text-center p-3">
+                <i class="fas fa-calculator text-primary fs-3 mb-2"></i>
+                <h6 class="text-primary mb-1">Total de Cálculos</h6>
+                <h4 class="mb-0">{{ calculations.total }}</h4>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body text-center p-3">
+                <i class="fas fa-bridge text-success fs-3 mb-2"></i>
+                <h6 class="text-success mb-1">Estruturais</h6>
+                <h4 class="mb-0">{{ calculations.items | selectattr('module', 'equalto', 'structural') | list | length }}</h4>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body text-center p-3">
+                <i class="fas fa-tint text-info fs-3 mb-2"></i>
+                <h6 class="text-info mb-1">Hidráulicos</h6>
+                <h4 class="mb-0">{{ calculations.items | selectattr('module', 'equalto', 'hydraulics') | list | length }}</h4>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body text-center p-3">
+                <i class="fas fa-industry text-warning fs-3 mb-2"></i>
+                <h6 class="text-warning mb-1">Concreto</h6>
+                <h4 class="mb-0">{{ calculations.items | selectattr('module', 'equalto', 'concrete') | list | length }}</h4>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Filter and Search -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <form method="GET" class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label">Pesquisar por nome</label>
+                        <input type="text" class="form-control" name="search" 
+                               value="{{ request.args.get('search', '') }}" 
+                               placeholder="Nome do cálculo...">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Módulo</label>
+                        <select class="form-select" name="module">
+                            <option value="">Todos os módulos</option>
+                            <option value="structural" {% if request.args.get('module') == 'structural' %}selected{% endif %}>Estrutural</option>
+                            <option value="concrete" {% if request.args.get('module') == 'concrete' %}selected{% endif %}>Concreto</option>
+                            <option value="hydraulics" {% if request.args.get('module') == 'hydraulics' %}selected{% endif %}>Hidráulica</option>
+                            <option value="foundations" {% if request.args.get('module') == 'foundations' %}selected{% endif %}>Fundações</option>
+                            <option value="topography" {% if request.args.get('module') == 'topography' %}selected{% endif %}>Topografia</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Período</label>
+                        <select class="form-select" name="period">
+                            <option value="">Todo período</option>
+                            <option value="today" {% if request.args.get('period') == 'today' %}selected{% endif %}>Hoje</option>
+                            <option value="week" {% if request.args.get('period') == 'week' %}selected{% endif %}>Última semana</option>
+                            <option value="month" {% if request.args.get('period') == 'month' %}selected{% endif %}>Último mês</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2 d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fas fa-search me-1"></i>Filtrar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Calculations List -->
+<div class="row">
+    <div class="col-12">
+        {% if calculations.items %}
+        <div class="card border-0 shadow-sm">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="fas fa-list me-2"></i>Cálculos Encontrados
+                </h5>
+                <div class="btn-group btn-group-sm" role="group">
+                    <button type="button" class="btn btn-outline-primary" onclick="toggleView('card')">
+                        <i class="fas fa-th-large"></i>
+                    </button>
+                    <button type="button" class="btn btn-outline-primary active" onclick="toggleView('table')">
+                        <i class="fas fa-list"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Table View -->
+            <div id="tableView" class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Nome</th>
+                                <th>Módulo</th>
+                                <th>Data</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for calc in calculations.items %}
+                            <tr>
+                                <td>
+                                    <div>
+                                        <strong>{{ calc.name }}</strong>
+                                        <br><small class="text-muted">ID: #{{ calc.id }}</small>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="badge bg-{% if calc.module == 'structural' %}primary{% elif calc.module == 'concrete' %}success{% elif calc.module == 'hydraulics' %}info{% elif calc.module == 'foundations' %}warning{% elif calc.module == 'topography' %}danger{% else %}secondary{% endif %}">
+                                        {% if calc.module == 'structural' %}
+                                            <i class="fas fa-bridge me-1"></i>Estrutural
+                                        {% elif calc.module == 'concrete' %}
+                                            <i class="fas fa-industry me-1"></i>Concreto
+                                        {% elif calc.module == 'hydraulics' %}
+                                            <i class="fas fa-tint me-1"></i>Hidráulica
+                                        {% elif calc.module == 'foundations' %}
+                                            <i class="fas fa-home me-1"></i>Fundações
+                                        {% elif calc.module == 'topography' %}
+                                            <i class="fas fa-map me-1"></i>Topografia
+                                        {% else %}
+                                            {{ calc.module.title() }}
+                                        {% endif %}
+                                    </span>
+                                </td>
+                                <td>
+                                    {{ calc.created_at.strftime('%d/%m/%Y') }}<br>
+                                    <small class="text-muted">{{ calc.created_at.strftime('%H:%M') }}</small>
+                                </td>
+                                <td>
+                                    <div class="btn-group btn-group-sm">
+                                        <button class="btn btn-outline-primary" 
+                                                onclick="viewCalculation({{ calc.id }})"
+                                                data-bs-toggle="tooltip" 
+                                                title="Visualizar">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <button class="btn btn-outline-success" 
+                                                onclick="exportCalculation({{ calc.id }})"
+                                                data-bs-toggle="tooltip" 
+                                                title="Exportar PDF">
+                                            <i class="fas fa-file-pdf"></i>
+                                        </button>
+                                        <button class="btn btn-outline-danger" 
+                                                onclick="deleteCalculation({{ calc.id }})"
+                                                data-bs-toggle="tooltip" 
+                                                title="Excluir">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Card View (Hidden by default) -->
+            <div id="cardView" class="card-body d-none">
+                <div class="row g-3">
+                    {% for calc in calculations.items %}
+                    <div class="col-md-6 col-lg-4">
+                        <div class="card border h-100">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <h6 class="card-title mb-0">{{ calc.name }}</h6>
+                                    <span class="badge bg-{% if calc.module == 'structural' %}primary{% elif calc.module == 'concrete' %}success{% elif calc.module == 'hydraulics' %}info{% elif calc.module == 'foundations' %}warning{% elif calc.module == 'topography' %}danger{% else %}secondary{% endif %}">
+                                        {{ calc.module.title() }}
+                                    </span>
+                                </div>
+                                <p class="card-text text-muted small mb-3">
+                                    {{ calc.created_at.strftime('%d/%m/%Y às %H:%M') }}
+                                </p>
+                                <div class="btn-group w-100" role="group">
+                                    <button class="btn btn-outline-primary btn-sm" onclick="viewCalculation({{ calc.id }})">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button class="btn btn-outline-success btn-sm" onclick="exportCalculation({{ calc.id }})">
+                                        <i class="fas fa-file-pdf"></i>
+                                    </button>
+                                    <button class="btn btn-outline-danger btn-sm" onclick="deleteCalculation({{ calc.id }})">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Pagination -->
+        {% if calculations.pages > 1 %}
+        <nav aria-label="Navegação de páginas" class="mt-4">
+            <ul class="pagination justify-content-center">
+                {% if calculations.has_prev %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('history', page=calculations.prev_num, **request.args) }}">
+                            <i class="fas fa-chevron-left"></i>
+                        </a>
+                    </li>
+                {% endif %}
+                
+                {% for page_num in calculations.iter_pages() %}
+                    {% if page_num %}
+                        {% if page_num != calculations.page %}
+                            <li class="page-item">
+                                <a class="page-link" href="{{ url_for('history', page=page_num, **request.args) }}">
+                                    {{ page_num }}
+                                </a>
+                            </li>
+                        {% else %}
+                            <li class="page-item active">
+                                <span class="page-link">{{ page_num }}</span>
+                            </li>
+                        {% endif %}
+                    {% else %}
+                        <li class="page-item disabled">
+                            <span class="page-link">…</span>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+                
+                {% if calculations.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('history', page=calculations.next_num, **request.args) }}">
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+
+        {% else %}
+        <!-- Empty State -->
+        <div class="card border-0 shadow-sm">
+            <div class="card-body text-center py-5">
+                <i class="fas fa-calculator text-muted" style="font-size: 4rem;"></i>
+                <h4 class="mt-3">Nenhum cálculo encontrado</h4>
+                {% if request.args.get('search') or request.args.get('module') or request.args.get('period') %}
+                <p class="text-muted mb-4">Tente ajustar os filtros de pesquisa</p>
+                <a href="{{ url_for('history') }}" class="btn btn-primary">
+                    <i class="fas fa-times me-2"></i>Limpar Filtros
+                </a>
+                {% else %}
+                <p class="text-muted mb-4">Você ainda não realizou nenhum cálculo</p>
+                <a href="{{ url_for('dashboard') }}" class="btn btn-primary">
+                    <i class="fas fa-calculator me-2"></i>Fazer Primeiro Cálculo
+                </a>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Calculation Detail Modal -->
+<div class="modal fade" id="calculationModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Detalhes do Cálculo</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="calculationDetails">
+                <!-- Dynamic content will be loaded here -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                <button type="button" class="btn btn-primary" onclick="exportCurrentCalculation()">
+                    <i class="fas fa-file-pdf me-2"></i>Exportar PDF
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let currentCalculationId = null;
+
+// Toggle between card and table view
+function toggleView(viewType) {
+    const tableView = document.getElementById('tableView');
+    const cardView = document.getElementById('cardView');
+    const buttons = document.querySelectorAll('.btn-group .btn');
+    
+    buttons.forEach(btn => btn.classList.remove('active'));
+    
+    if (viewType === 'card') {
+        tableView.classList.add('d-none');
+        cardView.classList.remove('d-none');
+        buttons[0].classList.add('active');
+    } else {
+        cardView.classList.add('d-none');
+        tableView.classList.remove('d-none');
+        buttons[1].classList.add('active');
+    }
+}
+
+// View calculation details
+function viewCalculation(calcId) {
+    currentCalculationId = calcId;
+    
+    // Show loading state
+    document.getElementById('calculationDetails').innerHTML = `
+        <div class="text-center py-4">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Carregando...</span>
+            </div>
+            <p class="mt-2">Carregando detalhes...</p>
+        </div>
+    `;
+    
+    // Show modal
+    const modal = new bootstrap.Modal(document.getElementById('calculationModal'));
+    modal.show();
+    
+    // Simulate loading calculation details
+    setTimeout(() => {
+        document.getElementById('calculationDetails').innerHTML = `
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i>
+                Funcionalidade de visualização detalhada em desenvolvimento.
+                <br>ID do cálculo: ${calcId}
+            </div>
+        `;
+    }, 1000);
+}
+
+// Export calculation
+function exportCalculation(calcId) {
+    // Simulate PDF export
+    const loadingToast = showToast('Gerando PDF...', 'info');
+    
+    setTimeout(() => {
+        loadingToast.hide();
+        showToast('Funcionalidade de exportação em desenvolvimento', 'warning');
+    }, 2000);
+}
+
+// Export current calculation from modal
+function exportCurrentCalculation() {
+    if (currentCalculationId) {
+        exportCalculation(currentCalculationId);
+    }
+}
+
+// Delete calculation
+function deleteCalculation(calcId) {
+    if (confirm('Tem certeza que deseja excluir este cálculo? Esta ação não pode ser desfeita.')) {
+        showToast('Funcionalidade de exclusão em desenvolvimento', 'warning');
+    }
+}
+
+// Utility function to show toast notifications
+function showToast(message, type = 'info') {
+    // Create toast element
+    const toastHtml = `
+        <div class="toast align-items-center text-bg-${type}" role="alert">
+            <div class="d-flex">
+                <div class="toast-body">${message}</div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        </div>
+    `;
+    
+    // Add to toast container (create if doesn't exist)
+    let toastContainer = document.getElementById('toastContainer');
+    if (!toastContainer) {
+        toastContainer = document.createElement('div');
+        toastContainer.id = 'toastContainer';
+        toastContainer.className = 'toast-container position-fixed top-0 end-0 p-3';
+        toastContainer.style.zIndex = '9999';
+        document.body.appendChild(toastContainer);
+    }
+    
+    toastContainer.insertAdjacentHTML('beforeend', toastHtml);
+    
+    // Initialize and show toast
+    const toastElement = toastContainer.lastElementChild;
+    const toast = new bootstrap.Toast(toastElement, { delay: 3000 });
+    toast.show();
+    
+    // Remove toast element after it hides
+    toastElement.addEventListener('hidden.bs.toast', () => {
+        toastElement.remove();
+    });
+    
+    return toast;
+}
+
+// Initialize tooltips
+document.addEventListener('DOMContentLoaded', function() {
+    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    tooltipTriggerList.map(function(tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,180 @@
+{% extends "base.html" %}
+
+{% block content %}
+<!-- Hero Section -->
+<div class="hero-section mb-5">
+    <div class="hero-content bg-gradient text-white rounded-4 p-5 text-center position-relative overflow-hidden">
+        <div class="position-relative z-1">
+            <h1 class="display-4 fw-bold mb-4">Sistema Completo de Cálculos de Engenharia Civil</h1>
+            <p class="lead mb-4 text-white-50">Desenvolvido por <strong>João Layon</strong></p>
+            <p class="fs-5 mb-5 mx-auto" style="max-width: 800px;">
+                Plataforma profissional SaaS com todas as calculadoras e rotinas essenciais 
+                para engenheiros civis: estruturas, fundações, hidráulica, topografia e muito mais.
+            </p>
+            {% if not current_user.is_authenticated %}
+            <div class="d-flex gap-3 justify-content-center flex-wrap">
+                <a href="{{ url_for('register') }}" class="btn btn-light btn-lg px-4 py-3">
+                    <i class="fas fa-user-plus me-2"></i>Cadastrar Grátis
+                </a>
+                <a href="{{ url_for('login') }}" class="btn btn-outline-light btn-lg px-4 py-3">
+                    <i class="fas fa-sign-in-alt me-2"></i>Fazer Login
+                </a>
+            </div>
+            {% else %}
+            <a href="{{ url_for('dashboard') }}" class="btn btn-light btn-lg px-4 py-3">
+                <i class="fas fa-tachometer-alt me-2"></i>Acessar Dashboard
+            </a>
+            {% endif %}
+        </div>
+        <!-- Geometric Background -->
+        <div class="position-absolute top-0 start-0 w-100 h-100 opacity-5">
+            <div class="geometric-pattern"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Features Section -->
+<div class="features-section mb-5">
+    <div class="text-center mb-5">
+        <h2 class="mb-4">Módulos Disponíveis</h2>
+        <p class="text-muted fs-5 mx-auto" style="max-width: 600px;">
+            Ferramentas completas para todas as áreas da engenharia civil
+        </p>
+    </div>
+
+    <div class="modules-grid">
+        <div class="module-card">
+            <div class="module-icon bg-primary">
+                <i class="fas fa-bridge"></i>
+            </div>
+            <h5 class="module-title">Análise Estrutural</h5>
+            <p class="module-description">
+                Cálculo de esforços internos, momentos fletores, cortantes e deflexões em vigas e estruturas.
+            </p>
+            <ul class="module-features">
+                <li><i class="fas fa-check"></i>Diagramas de momento e cortante</li>
+                <li><i class="fas fa-check"></i>Cálculo de flechas</li>
+                <li><i class="fas fa-check"></i>Análise de carregamentos</li>
+            </ul>
+        </div>
+
+        <div class="module-card">
+            <div class="module-icon bg-success">
+                <i class="fas fa-industry"></i>
+            </div>
+            <h5 class="module-title">Concreto Armado</h5>
+            <p class="module-description">
+                Dimensionamento de elementos em concreto armado conforme NBR 6118.
+            </p>
+            <ul class="module-features">
+                <li><i class="fas fa-check"></i>Cálculo de armaduras</li>
+                <li><i class="fas fa-check"></i>Verificação ELU/ELS</li>
+                <li><i class="fas fa-check"></i>Vigas, pilares e lajes</li>
+            </ul>
+        </div>
+
+        <div class="module-card">
+            <div class="module-icon bg-info">
+                <i class="fas fa-tint"></i>
+            </div>
+            <h5 class="module-title">Hidráulica</h5>
+            <p class="module-description">
+                Cálculos de escoamento, perdas de carga e dimensionamento de tubulações.
+            </p>
+            <ul class="module-features">
+                <li><i class="fas fa-check"></i>Equação de Bernoulli</li>
+                <li><i class="fas fa-check"></i>Darcy-Weisbach</li>
+                <li><i class="fas fa-check"></i>Dimensionamento de redes</li>
+            </ul>
+        </div>
+
+        <div class="module-card">
+            <div class="module-icon bg-warning">
+                <i class="fas fa-home"></i>
+            </div>
+            <h5 class="module-title">Fundações</h5>
+            <p class="module-description">
+                Capacidade de carga, dimensionamento de sapatas e análise geotécnica.
+            </p>
+            <ul class="module-features">
+                <li><i class="fas fa-check"></i>Capacidade por Terzaghi</li>
+                <li><i class="fas fa-check"></i>Sapatas e blocos</li>
+                <li><i class="fas fa-check"></i>Análise de recalques</li>
+            </ul>
+        </div>
+
+        <div class="module-card">
+            <div class="module-icon bg-danger">
+                <i class="fas fa-map"></i>
+            </div>
+            <h5 class="module-title">Topografia</h5>
+            <p class="module-description">
+                Cálculo de áreas, volumes e processamento de coordenadas topográficas.
+            </p>
+            <ul class="module-features">
+                <li><i class="fas fa-check"></i>Área por coordenadas</li>
+                <li><i class="fas fa-check"></i>Cálculo de volumes</li>
+                <li><i class="fas fa-check"></i>Nivelamento</li>
+            </ul>
+        </div>
+
+        <div class="module-card">
+            <div class="module-icon bg-secondary">
+                <i class="fas fa-calculator"></i>
+            </div>
+            <h5 class="module-title">Orçamentos</h5>
+            <p class="module-description">
+                Composições de custo, quantitativos e análise de materiais.
+            </p>
+            <ul class="module-features">
+                <li><i class="fas fa-check"></i>Composições SINAPI</li>
+                <li><i class="fas fa-check"></i>Quantitativos automáticos</li>
+                <li><i class="fas fa-check"></i>Relatórios de custo</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<!-- About Section -->
+<div class="about-section mb-5" >
+    <div class="about-content rounded-4 p-5" style="color: black; >
+        <div class="d-flex flex-column flex-md-row align-items-center gap-4">
+            <div class="flex-grow-1">
+                <h3 class="mb-4">Sobre João Layon</h3>
+                <p class="mb-4 fs-6">
+                    Desenvolvedor de sistemas especializado em criar soluções tecnológicas 
+                    para a engenharia civil. Este sistema foi desenvolvido com base em anos de experiência 
+                    prática, aliando programação e conhecimento técnico das normas brasileiras.
+                </p>
+                <div class="mission-box p-4 rounded-3">
+                    <strong class="text-primary">Missão:</strong> Democratizar o acesso a ferramentas de cálculo estrutural 
+                    e facilitar o trabalho diário dos engenheiros civis com soluções digitais precisas e confiáveis.
+                </div>
+            </div>
+            <div class="text-center">
+                <div class="engineer-avatar mb-3">
+                    <i class="fas fa-user-tie"></i>
+                </div>
+                <p class="fw-bold mb-1">João Layon</p>
+                <small class="text-muted">Engenheiro Civil</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- CTA Section -->
+{% if not current_user.is_authenticated %}
+<div class="cta-section">
+    <div class="cta-content bg-gradient text-white rounded-4 p-5 text-center">
+        <h3 class="mb-4">Comece a usar agora mesmo!</h3>
+        <p class="mb-5 fs-5 mx-auto" style="max-width: 600px;">
+            Cadastre-se gratuitamente e tenha acesso aos módulos básicos. 
+            Upgrade para Pro e desbloqueie todas as funcionalidades.
+        </p>
+        <a href="{{ url_for('register') }}" class="btn btn-light btn-lg px-5 py-3">
+            <i class="fas fa-rocket me-2"></i>Começar Agora
+        </a>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

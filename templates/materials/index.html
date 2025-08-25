@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+
+{% block title %}Materiais - Sistema de Engenharia Civil{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2><i class="fas fa-cubes me-2"></i>Banco de Materiais</h2>
+            <a href="{{ url_for('new_material') }}" class="btn btn-primary">
+                <i class="fas fa-plus me-1"></i>Novo Material
+            </a>
+        </div>
+
+        {% if materials %}
+        <!-- Filtros -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <input type="text" class="form-control" id="searchMaterial" placeholder="Buscar material...">
+                    </div>
+                    <div class="col-md-4">
+                        <select class="form-select" id="filterCategory">
+                            <option value="">Todas as categorias</option>
+                            <option value="cimento">Cimento</option>
+                            <option value="areia">Areia</option>
+                            <option value="brita">Brita</option>
+                            <option value="aco">Aço</option>
+                            <option value="blocos">Blocos</option>
+                            <option value="tubulacao">Tubulação</option>
+                            <option value="madeira">Madeira</option>
+                            <option value="ceramica">Cerâmica</option>
+                            <option value="tinta">Tinta</option>
+                            <option value="outros">Outros</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <button class="btn btn-outline-primary w-100" onclick="filterMaterials()">
+                            <i class="fas fa-filter me-1"></i>Filtrar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Lista de Materiais -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">{{ materials|length }} materiais cadastrados</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped" id="materialsTable">
+                        <thead>
+                            <tr>
+                                <th>Material</th>
+                                <th>Categoria</th>
+                                <th>Unidade</th>
+                                <th>Preço Unitário</th>
+                                <th>Fornecedor</th>
+                                <th>Última Atualização</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for material in materials %}
+                            <tr data-category="{{ material.category }}" data-name="{{ material.name.lower() }}">
+                                <td>
+                                    <strong>{{ material.name }}</strong>
+                                </td>
+                                <td>
+                                    <span class="badge bg-secondary">{{ material.category.title() }}</span>
+                                </td>
+                                <td>{{ material.unit }}</td>
+                                <td class="fw-bold">R$ {{ "%.2f"|format(material.unit_cost) }}</td>
+                                <td>{{ material.supplier or '-' }}</td>
+                                <td>{{ material.last_updated.strftime('%d/%m/%Y') }}</td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <button class="btn btn-outline-primary btn-sm" onclick="editMaterial({{ material.id }})">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="btn btn-outline-success btn-sm" onclick="useMaterial({{ material.id }})">
+                                            <i class="fas fa-plus"></i>
+                                        </button>
+                                        <button class="btn btn-outline-danger btn-sm" onclick="deleteMaterial({{ material.id }})">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+            <div class="mb-4">
+                <i class="fas fa-cubes fa-4x text-muted"></i>
+            </div>
+            <h4 class="text-muted">Nenhum material cadastrado</h4>
+            <p class="text-muted">Cadastre materiais para usar em suas composições e orçamentos.</p>
+            <a href="{{ url_for('new_material') }}" class="btn btn-primary">
+                <i class="fas fa-plus me-1"></i>Cadastrar Primeiro Material
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+function filterMaterials() {
+    const searchTerm = document.getElementById('searchMaterial').value.toLowerCase();
+    const categoryFilter = document.getElementById('filterCategory').value;
+    const rows = document.querySelectorAll('#materialsTable tbody tr');
+    
+    rows.forEach(row => {
+        const name = row.getAttribute('data-name');
+        const category = row.getAttribute('data-category');
+        
+        const matchesSearch = !searchTerm || name.includes(searchTerm);
+        const matchesCategory = !categoryFilter || category === categoryFilter;
+        
+        row.style.display = (matchesSearch && matchesCategory) ? '' : 'none';
+    });
+}
+
+function editMaterial(materialId) {
+    alert('Funcionalidade de edição em desenvolvimento');
+}
+
+function useMaterial(materialId) {
+    alert('Funcionalidade para usar material em orçamento em desenvolvimento');
+}
+
+function deleteMaterial(materialId) {
+    if (confirm('Tem certeza que deseja excluir este material?')) {
+        alert('Funcionalidade de exclusão em desenvolvimento');
+    }
+}
+
+// Filtro em tempo real
+document.getElementById('searchMaterial').addEventListener('input', filterMaterials);
+document.getElementById('filterCategory').addEventListener('change', filterMaterials);
+</script>
+{% endblock %}

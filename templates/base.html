@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Sistema de Cálculos de Engenharia Civil - João Layon{% endblock %}</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    
+    <style>
+    /* Mobile Responsive Improvements */
+    @media (max-width: 768px) {
+        .navbar-brand {
+            font-size: 0.9rem;
+        }
+        
+        .navbar-brand small {
+            display: none;
+        }
+        
+        .card-body canvas {
+            max-height: 200px !important;
+        }
+        
+        .btn-group .btn {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.8rem;
+        }
+        
+        .table-responsive {
+            font-size: 0.9rem;
+        }
+        
+        .alert {
+            font-size: 0.9rem;
+        }
+        
+        .card-title {
+            font-size: 1rem;
+        }
+        
+        .stats-card h4 {
+            font-size: 1.5rem;
+        }
+        
+        .dropdown-menu {
+            font-size: 0.9rem;
+        }
+    }
+    
+    @media (max-width: 576px) {
+        .container {
+            padding-left: 10px;
+            padding-right: 10px;
+        }
+        
+        .card {
+            margin-bottom: 1rem;
+        }
+        
+        .btn {
+            font-size: 0.8rem;
+            padding: 0.375rem 0.75rem;
+        }
+        
+        .col-md-6.col-lg-3 {
+            margin-bottom: 1rem;
+        }
+        
+        h1 {
+            font-size: 1.5rem;
+        }
+        
+        h3 {
+            font-size: 1.25rem;
+        }
+        
+        .navbar-nav .dropdown-menu {
+            position: static !important;
+            float: none;
+            width: 100%;
+            margin-top: 0;
+            background-color: var(--bs-dark);
+            border: 0;
+        }
+    }
+    
+    /* Touch-friendly improvements */
+    @media (max-width: 768px) {
+        .btn, .nav-link, .dropdown-item {
+            min-height: 44px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .card {
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .hover-shadow:hover {
+            transform: none; /* Disable transform on mobile */
+        }
+    }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="{{ url_for('index') }}">
+                <i class="fas fa-calculator me-2"></i>
+                Sistema de Engenharia Civil
+                <small class="text-muted">- João Layon</small>
+            </a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    {% if current_user.is_authenticated %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('dashboard') }}">
+                            <i class="fas fa-tachometer-alt me-1"></i>Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-tools me-1"></i>Módulos
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{{ url_for('structural') }}">
+                                <i class="fas fa-bridge me-2"></i>Análise Estrutural
+                            </a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('concrete') }}">
+                                <i class="fas fa-industry me-2"></i>Concreto Armado
+                            </a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('hydraulics') }}">
+                                <i class="fas fa-tint me-2"></i>Hidráulica
+                            </a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('foundations') }}">
+                                <i class="fas fa-home me-2"></i>Fundações
+                            </a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('topography') }}">
+                                <i class="fas fa-map me-2"></i>Topografia
+                            </a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-project-diagram me-1"></i>Projetos
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{{ url_for('projects') }}">
+                                <i class="fas fa-folder-open me-2"></i>Meus Projetos
+                            </a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('new_project') }}">
+                                <i class="fas fa-plus me-2"></i>Novo Projeto
+                            </a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{{ url_for('materials') }}">
+                                <i class="fas fa-cubes me-2"></i>Materiais
+                            </a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('compositions') }}">
+                                <i class="fas fa-list-alt me-2"></i>Composições
+                            </a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('history') }}">
+                            <i class="fas fa-history me-1"></i>Histórico
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('technical_standards') }}">
+                            <i class="fas fa-book me-1"></i>Normas NBR
+                        </a>
+                    </li>
+                    {% if current_user.is_admin() %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('admin_panel') }}">
+                            <i class="fas fa-cogs me-1"></i>Administração
+                        </a>
+                    </li>
+                    {% endif %}
+                    {% endif %}
+                </ul>
+                
+                <ul class="navbar-nav">
+                    {% if current_user.is_authenticated %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-user me-1"></i>{{ current_user.name }}
+                            <span class="badge bg-{% if current_user.plan == 'pro' %}success{% else %}secondary{% endif %} ms-1">
+                                {{ current_user.plan.upper() }}
+                            </span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{{ url_for('profile') }}">
+                                <i class="fas fa-user-cog me-2"></i>Perfil
+                            </a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{{ url_for('logout') }}">
+                                <i class="fas fa-sign-out-alt me-2"></i>Sair
+                            </a></li>
+                        </ul>
+                    </li>
+                    {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('login') }}">
+                            <i class="fas fa-sign-in-alt me-1"></i>Entrar
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('register') }}">
+                            <i class="fas fa-user-plus me-1"></i>Cadastrar
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="container mt-3">
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <!-- Main Content -->
+    <main class="container my-4">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-light py-4 mt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5 class="fw-bold">Sistema de Cálculos de Engenharia Civil</h5>
+                    <p class="mb-2">Desenvolvido por <strong>João Layon</strong></p>
+                    <p class="text-muted small">Ferramentas profissionais para engenheiros civis</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <p class="mb-1"><strong>Contato:</strong></p>
+                    <p class="text-muted small">
+                        <i class="fas fa-envelope me-1"></i>joaolayon072@gmail.com<br>
+                        <i class="fas fa-phone me-1"></i>(31)9 7128-0512
+                    </p>
+                </div>
+            </div>
+            <hr class="my-3">
+            <div class="row">
+                <div class="col-12 text-center">
+                    <p class="mb-0 text-muted small">
+                        &copy; 2024 João Layon. Todos os direitos reservados. | 
+                        Sistema SaaS de Engenharia Civil
+                    </p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Custom JS -->
+    <script src="{{ url_for('static', filename='js/calculations.js') }}"></script>
+    
+    {% block scripts %}{% endblock %}
+</body>
+</html>

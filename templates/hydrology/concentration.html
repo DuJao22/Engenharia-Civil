@@ -1,0 +1,240 @@
+{% extends "base.html" %}
+
+{% block title %}Tempo de Concentração - Sistema de Engenharia Civil{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h1>
+            <i class="fas fa-stopwatch me-2"></i>Tempo de Concentração
+        </h1>
+        <p class="text-muted">Cálculo do tempo de concentração para bacias hidrográficas</p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-6">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-river me-2"></i>Dados da Bacia
+                </h5>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    {{ form.hidden_tag() }}
+                    
+                    <div class="mb-3">
+                        {{ form.name.label(class="form-label") }}
+                        {{ form.name(class="form-control" + (" is-invalid" if form.name.errors else "")) }}
+                        {% if form.name.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.name.errors %}{{ error }}{% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form.length_km.label(class="form-label") }}
+                        {{ form.length_km(class="form-control" + (" is-invalid" if form.length_km.errors else "")) }}
+                        {% if form.length_km.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.length_km.errors %}{{ error }}{% endfor %}
+                            </div>
+                        {% endif %}
+                        <div class="form-text">Comprimento do curso d'água principal desde o divisor até o exutório</div>
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form.slope_percent.label(class="form-label") }}
+                        {{ form.slope_percent(class="form-control" + (" is-invalid" if form.slope_percent.errors else "")) }}
+                        {% if form.slope_percent.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.slope_percent.errors %}{{ error }}{% endfor %}
+                            </div>
+                        {% endif %}
+                        <div class="form-text">Declividade média do talvegue principal</div>
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form.method.label(class="form-label") }}
+                        {{ form.method(class="form-select" + (" is-invalid" if form.method.errors else "")) }}
+                        {% if form.method.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.method.errors %}{{ error }}{% endfor %}
+                            </div>
+                        {% endif %}
+                        <div class="form-text">Método de cálculo: Kirpich (bacias rurais), NRCS (bacias urbanizadas)</div>
+                    </div>
+
+                    <div class="d-grid">
+                        {{ form.submit(class="btn btn-info btn-lg") }}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-6">
+        {% if result %}
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-clock me-2"></i>Resultado do Cálculo
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-12">
+                        <div class="bg-dark text-white rounded p-3">
+                            <h6 class="text-info mb-2">
+                                <i class="fas fa-info-circle me-1"></i>Dados de Entrada
+                            </h6>
+                            <ul class="list-unstyled mb-0 small">
+                                <li><strong>Comprimento:</strong> {{ result.length_km }} km</li>
+                                <li><strong>Declividade:</strong> {{ result.slope_percent }}%</li>
+                                <li><strong>Método:</strong> {{ result.method|title }}</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="col-12">
+                        <div class="text-center p-4 bg-success bg-opacity-10 rounded">
+                            <i class="fas fa-stopwatch text-success fs-2 mb-2"></i>
+                            <h6 class="text-success mb-1">Tempo de Concentração</h6>
+                            <h2 class="mb-0 text-success">{{ result.time_concentration }} min</h2>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="text-center p-3 bg-primary bg-opacity-10 rounded">
+                            <i class="fas fa-clock text-primary fs-4 mb-2"></i>
+                            <h6 class="text-primary mb-1">Em Horas</h6>
+                            <h5 class="mb-0">{{ "%.2f"|format(result.time_concentration / 60) }} h</h5>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="text-center p-3 bg-warning bg-opacity-10 rounded">
+                            <i class="fas fa-tachometer-alt text-warning fs-4 mb-2"></i>
+                            <h6 class="text-warning mb-1">Velocidade Média</h6>
+                            <h5 class="mb-0">{{ "%.2f"|format((result.length_km * 1000) / (result.time_concentration * 60)) }} m/s</h5>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-4">
+                    <h6 class="mb-3">Fórmula Utilizada:</h6>
+                    <div class="bg-dark text-white rounded p-3">
+                        {% if result.method == 'kirpich' %}
+                        <p class="mb-2"><strong>Fórmula de Kirpich:</strong></p>
+                        <p class="mb-1">tc = 0.0195 × L<sup>0.77</sup> / S<sup>0.385</sup></p>
+                        <small class="text-muted">
+                            Onde: tc = tempo de concentração (min), L = comprimento (km), S = declividade (m/m)
+                        </small>
+                        {% elif result.method == 'nrcs' %}
+                        <p class="mb-2"><strong>Método NRCS (SCS):</strong></p>
+                        <p class="mb-1">tc = 0.057 × L<sup>0.8</sup> / S<sup>0.5</sup></p>
+                        <small class="text-muted">
+                            Onde: tc = tempo de concentração (min), L = comprimento (km), S = declividade (m/m)
+                        </small>
+                        {% else %}
+                        <p class="mb-2"><strong>Método California Culverts:</strong></p>
+                        <p class="mb-1">tc = 0.057 × L<sup>0.8</sup> / S<sup>0.5</sup></p>
+                        <small class="text-muted">
+                            Onde: tc = tempo de concentração (min), L = comprimento (km), S = declividade (m/m)
+                        </small>
+                        {% endif %}
+                    </div>
+                </div>
+
+                {% if result.time_concentration < 5 %}
+                <div class="alert alert-warning mt-3">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <strong>Atenção:</strong> Tempo de concentração muito baixo. Verificar dados de entrada.
+                </div>
+                {% elif result.time_concentration > 300 %}
+                <div class="alert alert-info mt-3">
+                    <i class="fas fa-info-circle me-2"></i>
+                    <strong>Observação:</strong> Tempo de concentração elevado, típico de bacias grandes.
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% else %}
+        <div class="card border-0 shadow-sm">
+            <div class="card-body text-center text-muted">
+                <i class="fas fa-stopwatch fs-1 mb-3"></i>
+                <h5>Aguardando Cálculo</h5>
+                <p>Preencha os dados da bacia hidrográfica e clique em "Calcular"</p>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Theory Section -->
+<div class="row mt-5">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-graduation-cap me-2"></i>Conceito de Tempo de Concentração
+                </h5>
+            </div>
+            <div class="card-body">
+                <p>
+                    O tempo de concentração (tc) é o tempo necessário para que uma gota d'água 
+                    percorra desde o ponto mais distante da bacia até o exutório (ponto de saída).
+                </p>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Método de Kirpich (1940):</h6>
+                        <ul>
+                            <li>Desenvolvido para bacias rurais naturais</li>
+                            <li>Baseado em dados de Tennessee (EUA)</li>
+                            <li>Área de drenagem: 0,004 a 453 km²</li>
+                            <li>Declividade: 0,3% a 10%</li>
+                            <li>Amplamente utilizado no Brasil</li>
+                        </ul>
+                        
+                        <h6>Método NRCS (SCS):</h6>
+                        <ul>
+                            <li>Natural Resources Conservation Service</li>
+                            <li>Adequado para bacias urbanizadas</li>
+                            <li>Considera diferentes tipos de cobertura</li>
+                            <li>Mais conservativo que Kirpich</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <h6>Aplicações:</h6>
+                        <ul>
+                            <li><i class="fas fa-check text-success me-2"></i>Dimensionamento de obras de drenagem</li>
+                            <li><i class="fas fa-check text-success me-2"></i>Cálculo de vazões de pico</li>
+                            <li><i class="fas fa-check text-success me-2"></i>Análise de enchentes urbanas</li>
+                            <li><i class="fas fa-check text-success me-2"></i>Projetos de barragens e reservatórios</li>
+                            <li><i class="fas fa-check text-success me-2"></i>Estudos de impacto hidrológico</li>
+                        </ul>
+                        
+                        <h6>Valores Típicos:</h6>
+                        <ul>
+                            <li>Bacias urbanas: 5 a 30 min</li>
+                            <li>Bacias rurais pequenas: 10 a 60 min</li>
+                            <li>Bacias rurais grandes: 1 a 10 horas</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="alert alert-info mt-3">
+                    <i class="fas fa-lightbulb me-2"></i>
+                    <strong>Importante:</strong> O tempo de concentração é fundamental para o método racional 
+                    de cálculo de vazões de projeto. Valores muito baixos podem superestimar as vazões, 
+                    enquanto valores muito altos podem subestimá-las.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

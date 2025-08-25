@@ -1,0 +1,549 @@
+Sistema Completo de Cálculos de Engenharia Civil — João Layon
+
+Documento de projeto, fórmulas, esquema de banco de dados e esboço de implementação (Flask + Python + SQLite + Mercado Pago). Este documento foi gerado para servir como base completa para um sistema SaaS de cálculos de Engenharia Civil com gestão de perfis/pagamentos.
+
+1. Objetivo
+
+Construir um sistema web (SaaS) para engenheiros civis que reúna todas (ou a maioria das) calculadoras e rotinas usadas no dia a dia: estruturas, fundações, lajes, vigas, pilares, hidráulica, saneamento, geotecnia, orçamentos, topografia, pavimentação, dimensionamento de redes, cronogramas, controle de materiais e composições de custo.
+
+Créditos e marca: João Layon — todo o sistema deverá ostentar sua marca e créditos.
+
+Tecnologias sugeridas: Python 3.11+, Flask, Jinja2, SQLite (ou PostgreSQL), TailwindCSS para frontend, Mercado Pago para pagamentos (PIX/cartão).
+
+2. Funcionalidades principais
+2.1 Autenticação e planos
+
+Cadastro/login (email + senha). Hashing de senha com bcrypt.
+
+Perfis/Planos: Gratuito (demo), Pro (mensal/Anual) — acesso aos módulos conforme plano.
+
+Integração Mercado Pago: gerar pagamentos PIX e cartão; webhook para confirmação e liberação automática.
+
+2.2 Módulos de cálculo
+
+Estruturas: determinação de esforços (N, V, M), dimensionamento concreto armado (vigas, pilares, lajes), verificação de armaduras, flechas.
+
+Concreto armado: dimensionamento por estados limite último (ELU) e de serviço (ELS).
+
+Aço: dimensionamento de perfis e ligações; verificação por flambagem.
+
+Fundações: sapatas isoladas, sapatas corridas, blocos, radier, estacas (capacidade última, recalques estimados).
+
+Geotecnia: propriedades do solo, empuxos, capacidade de carga por Terzaghi e Meyerhof, adensamento simples.
+
+Hidráulica & Saneamento: Bernoulli, perda de carga (Darcy-Weisbach e Hazen-Williams), cálculos de drenagem pluvial (método racional), dimensionamento de tubulações.
+
+Orçamentos (Composições): consumo de concreto, ferros, traços de argamassa, quantitativos, SINAPI/TCPO compatível.
+
+Topografia: áreas por coordenadas (shoelace), volume por seções transversais, nivelamento.
+
+Pavimentação: dimensionamento de pavimentos flexíveis e rígidos, equivalência de eixos (ESAL).
+
+Cronograma: CPM/PERT básico, cálculo de folgas e caminho crítico.
+
+2.3 Histórico e relatórios
+
+Salvar cada cálculo com inputs e resultados.
+
+Exportação PDF/Word/CSV dos relatórios e orçamentos.
+
+2.4 Admin (João Layon)
+
+Gerenciar planos, usuários, redefinir senhas, ver relatórios de receita, emitir notas (integração futura).
+
+3. Esquema de banco de dados (SQLite — tabelas principais)
+-- users
+CREATE TABLE users (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT,
+  email TEXT UNIQUE,
+  password_hash TEXT,
+  plan TEXT,
+  plan_expires DATETIME,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+
+-- payments
+CREATE TABLE payments (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id INTEGER,
+  mp_payment_id TEXT,
+  amount REAL,
+  currency TEXT,
+  method TEXT,
+  status TEXT,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY(user_id) REFERENCES users(id)
+);
+
+
+-- calculations (generic storage)
+CREATE TABLE calculations (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id INTEGER,
+  module TEXT,
+  name TEXT,
+  inputs TEXT, -- JSON
+  results TEXT, -- JSON
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY(user_id) REFERENCES users(id)
+);
+4. Fluxo de pagamento com Mercado Pago (resumo técnico)
+
+No frontend, usuário escolhe plano e clica em pagar.
+
+Backend (Flask) cria uma preferência / pagamento via SDK Mercado Pago (ou cria um order e gera QRCode PIX). Retorna link/checkout/pix_qr.
+
+Usuário conclui o pagamento.
+
+Mercado Pago envia webhook com payment.status = approved.
+
+Endpoint webhook atualiza payments e ativa users.plan_expires.
+
+Login valida plan_expires antes de liberar módulos pagos.
+
+Segurança: validar assinatura do webhook e restringir IPs se possível.
+
+5. Fórmulas e algoritmos por módulo (resumo prático e implementável)
+
+Abaixo estão as fórmulas mais usadas por cada disciplina e um breve algoritmo de como aplicá-las.
+
+5.1 Estruturas — Esforços internos
+
+Tensão normal: $\sigma = \dfrac{N}{A}$
+
+Tensão de cisalhamento média: $\tau = \dfrac{V}{A}$
+
+Momento fletor para carregamento pontual P no centro de viga simplesmente apoiada: $M_{max} = \dfrac{P \cdot L}{4}$
+
+Momento fletor para carregamento uniformemente distribuído w: $M_{max} = \dfrac{w L^{2}}{8}$
+
+Algoritmo: receber carregamentos (pontual, distribuído), apoio (simples, engastado), calcular diagramas de esforço cortante e momento (usando método das seções com integração ou formula direta para casos padrão).
+
+5.2 Concreto armado — dimensionamento de viga retangular (simplificado, método brasileiro)
+
+Momento resistente (M def): usar la norma (NBR 6118) para obter as fck, fyk, coeficientes.
+
+Área de aço mínima (As,min): regra prática: $A_{s,min} \approx 0,0015 \cdot b \cdot d$ (varia por norma).
+
+Equilíbrio para cálculo de As: $M_{sd} = A_{s} \cdot f_{yd} \cdot z$ onde $z \approx 0.9 d$ (aprox.).
+
+Passos:
+
+Calcular $M_{sd}$ (momento de projeto, combinações de cargas).
+
+Assumir alavanca z (0.85–0.95 d) e resolver $A_s = \dfrac{M_{sd}}{f_{yd} \cdot z}$.
+
+Verificar cobrimento e bitola/ espaçamento segundo norma.
+
+Nota: Para precisão total, implementar rotina que calcule posição da linha neutra usando curva concreta e diagrama de tensões (parâmetro k).
+
+5.3 Pilares (concreto) — verificação axial + momento (interaction)
+
+Cálculo pelo método das curvas interação (N-M). Utilizar capacidade de compressão da seção e reduzir por excentricidade.
+
+Formula básica tensão média: $\sigma_m = \dfrac{N_{sd}}{A_c}$; verificar com capacidade última $N_Rd$.
+
+5.4 Flecha (deflexão) — viga simplesmente apoiada com carga concentrada
+
+Flecha máxima para carga concentrada P no centro: $\delta_{max} = \dfrac{P L^{3}}{48 E I}$
+
+Para carga uniformemente distribuída: $\delta_{max} = \dfrac{5 w L^{4}}{384 E I}$
+
+Onde: $I$ momento de inércia da seção, $E$ módulo de elasticidade.
+
+5.5 Perdas de carga em tubulações
+
+Darcy-Weisbach: $h_f = f \dfrac{L}{D} \dfrac{V^{2}}{2g}$
+
+Número de Reynolds: $Re = \dfrac{V D}{\nu}$
+
+Cálculo do fator f: Colebrook-White (iterativo) ou fórmula de Swamee-Jain (explícita):
+
+𝑓
+=
+0.25
+[
+log
+⁡
+10
+(
+𝜀
+/
+𝐷
+3.7
++
+5.74
+𝑅
+𝑒
+0.9
+)
+]
+−
+2
+f=0.25[log
+10
+	​
+
+(
+3.7
+ε/D
+	​
+
++
+Re
+0.9
+5.74
+	​
+
+)]
+−2
+
+
+
+Hazen-Williams (água potável, menos preciso):
+
+ℎ
+𝑓
+=
+10.67
+⋅
+𝐿
+⋅
+𝑄
+1.852
+𝐶
+1.852
+𝐷
+4.87
+h
+f
+	​
+
+=10.67⋅L⋅
+C
+1.852
+D
+4.87
+Q
+1.852
+	​
+
+
+
+
+5.6 Método racional para dimensionar águas pluviais
+
+$Q = C \cdot i \cdot A$
+
+$Q$ = vazão (m³/s), $C$ = coeficiente de escoamento (adimensional), $i$ = intensidade da chuva (m/s), $A$ = área (m²).
+
+Intensidade i pode ser obtida via curva de intensidade-duração-frequência (IDF) local.
+
+5.7 Capacidade de carga de fundações rasas (Terzaghi)
+
+Capacidade última aproximada (sapata strip):
+
+𝑞
+𝑢
+𝑙
+𝑡
+=
+𝑐
+𝑁
+𝑐
++
+𝛾
+𝐷
+𝑓
+𝑁
+𝑞
++
+0.5
+𝛾
+𝐵
+𝑁
+𝛾
+q
+ult
+	​
+
+=cN
+c
+	​
+
++γD
+f
+	​
+
+N
+q
+	​
+
++0.5γBN
+γ
+	​
+
+
+
+
+onde $N_c, N_q, N_\gamma$ são fatores dependentes do ângulo de atrito $\phi$.
+
+Fator de segurança: $q_{adm} = \dfrac{q_{ult}}{FS}$
+
+5.8 Empuxo de terra (Rankine — inclinação vertical)
+
+Empuxo ativo: $E_a = \frac{1}{2} \gamma H^{2} K_a$ onde $K_a = \tan^{2}\left(45-\dfrac{\phi}{2}\right)$
+
+Empuxo passivo: $K_p = \tan^{2}\left(45+\dfrac{\phi}{2}\right)$
+
+5.9 Topografia — área por coordenadas (shoelace)
+
+Para polígono com vértices $(x_i,y_i)$:
+
+𝐴
+=
+1
+2
+∣
+∑
+𝑖
+=
+1
+𝑛
+−
+1
+(
+𝑥
+𝑖
+𝑦
+𝑖
++
+1
+−
+𝑥
+𝑖
++
+1
+𝑦
+𝑖
+)
++
+(
+𝑥
+𝑛
+𝑦
+1
+−
+𝑥
+1
+𝑦
+𝑛
+)
+∣
+A=
+2
+1
+	​
+
+	​
+
+∑
+i=1
+n−1
+	​
+
+(x
+i
+	​
+
+y
+i+1
+	​
+
+−x
+i+1
+	​
+
+y
+i
+	​
+
+)+(x
+n
+	​
+
+y
+1
+	​
+
+−x
+1
+	​
+
+y
+n
+	​
+
+)
+	​
+
+
+
+
+5.10 Volume por seções (prismoidal/simple trapezoidal)
+
+Volume entre duas seções $A_1$ e $A_2$ separadas por distância $L$:
+
+𝑉
+=
+𝐿
+2
+(
+𝐴
+1
++
+𝐴
+2
+)
+V=
+2
+L
+	​
+
+(A
+1
+	​
+
++A
+2
+	​
+
+)
+
+
+Para método prismoidal (melhor precisão):
+
+𝑉
+=
+𝐿
+6
+(
+𝐴
+1
++
+4
+𝐴
+𝑚
++
+𝐴
+2
+)
+V=
+6
+L
+	​
+
+(A
+1
+	​
+
++4A
+m
+	​
+
++A
+2
+	​
+
+)
+
+
+onde $A_m$ é área na seção média.
+
+5.11 Orçamento — consumo de concreto e aço
+
+Volume de concreto: $V_c = \text{comprimento} \times \text{largura} \times \text{altura}$
+
+Consumo de aço (estimativa): para lajes maciças $\approx$ 80–120 kg/m³ (varia conforme projeto). Para vigas/pilares calcular As e converter para kg usando comprimento e diâmetros das barras.
+
+6. Interface de usuário (visão geral)
+
+Dashboard inicial com módulos e status do plano.
+
+Navegação lateral: Estruturas, Fundações, Hidráulica, Topografia, Orçamentos, Histórico, Conta.
+
+Tela de cálculo: formulário (inputs), botão calcular, visualização gráfica (diagramas de momento/cortante), botão salvar/exportar.
+
+Área admin com gráficos de receita, lista de usuários e pagamentos.
+
+7. Esboço de endpoints Flask (exemplos)
+# app.py (trecho)
+from flask import Flask, request, jsonify, render_template
+from models import db, User, Payment, Calculation
+
+
+app = Flask(__name__)
+
+
+@app.route('/api/calculate/beam', methods=['POST'])
+def calc_beam():
+    data = request.json
+    # exemplo: calcular momento max para carga uniforme
+    L = data['L']
+    w = data['w']
+    Mmax = w * L**2 / 8
+    result = {'Mmax': Mmax}
+    # salvar em calculations
+    return jsonify(result)
+
+
+@app.route('/webhook/mercadopago', methods=['POST'])
+def mp_webhook():
+    payload = request.json
+    # validar assinatura
+    # atualizar payments e ativar user
+    return '', 200
+8. Boas práticas e segurança
+
+Hash de senhas com bcrypt + salt.
+
+HTTPS obrigatório (Let's Encrypt em produção).
+
+Validação rigorosa dos inputs de cálculo (limites, unidades).
+
+Testes unitários e de integração (pytest).
+
+Logs e monitoramento de erros (Sentry ou similar).
+
+9. Roadmap e entregáveis (versões)
+
+MVP (2–4 semanas): Autenticação, 5 calculadoras essenciais (viga, pilar, sapata, volume, orçamento), histórico, integração Mercado Pago básica.
+
+v1.1: Mais calculadoras (flecha, interação N-M), relatórios em PDF, export CSV.
+
+v2.0: Módulos avançados (adensamento, pavimentação), multi-idioma, integração com banco comercial.
+
+10. Anexos — trechos de fórmulas e snippets úteis (Python)
+
+Colebrook-White (iterativa)
+
+import math
+
+
+def colebrook(f_guess, Re, eps, D):
+    # f_guess: chute inicial
+    f = f_guess
+    for _ in range(50):
+        lhs = 1/math.sqrt(f)
+        rhs = -2*math.log10( (eps/(3.7*D)) + (2.51/(Re*math.sqrt(f))) )
+        f_new = 1/(rhs**2)
+        if abs(f_new-f) < 1e-6:
+            return f_new
+        f = f_new
+    return f
+
+Shoelace (área poligonal)
+
+def shoelace(coor

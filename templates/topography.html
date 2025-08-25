@@ -1,0 +1,323 @@
+{% extends "base.html" %}
+
+{% block title %}Topografia - Sistema de Engenharia Civil{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h1>
+            <i class="fas fa-map me-2"></i>Topografia
+        </h1>
+        <p class="text-muted">Cálculo de áreas utilizando coordenadas topográficas (Fórmula de Shoelace)</p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-6">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-danger text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-map-marked-alt me-2"></i>Coordenadas do Polígono
+                </h5>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    {{ form.hidden_tag() }}
+                    
+                    <div class="mb-3">
+                        {{ form.name.label(class="form-label") }}
+                        {{ form.name(class="form-control" + (" is-invalid" if form.name.errors else "")) }}
+                        {% if form.name.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.name.errors %}{{ error }}{% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form.coordinates.label(class="form-label") }}
+                        {{ form.coordinates(class="form-control" + (" is-invalid" if form.coordinates.errors else ""), rows="10") }}
+                        {% if form.coordinates.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.coordinates.errors %}{{ error }}{% endfor %}
+                            </div>
+                        {% endif %}
+                        <div class="form-text">
+                            <strong>Formato:</strong> Digite as coordenadas X,Y separadas por vírgula, uma por linha.<br>
+                            <strong>Exemplo:</strong><br>
+                            100.50,200.25<br>
+                            150.75,180.30<br>
+                            120.00,160.45
+                        </div>
+                    </div>
+
+                    <div class="d-grid">
+                        {{ form.submit(class="btn btn-danger btn-lg") }}
+                    </div>
+                </form>
+
+                <div class="mt-4">
+                    <h6 class="mb-3">Exemplo de Coordenadas:</h6>
+                    <div class="bg-dark text-white rounded p-3">
+                        <button class="btn btn-sm btn-outline-primary mb-2" onclick="fillExample()">
+                            <i class="fas fa-copy me-1"></i>Usar Exemplo
+                        </button>
+                        <pre class="mb-0 small text-muted">0,0
+100,0
+100,50
+50,50
+50,25
+0,25</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-6">
+        {% if result %}
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-danger text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-chart-area me-2"></i>Resultados Topográficos
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-12">
+                        <div class="text-center p-4 bg-danger bg-opacity-10 rounded">
+                            <i class="fas fa-vector-square text-danger fs-2 mb-2"></i>
+                            <h6 class="text-danger mb-1">Área do Polígono</h6>
+                            <h2 class="mb-0 text-danger">{{ result.area }} m²</h2>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="text-center p-3 bg-primary bg-opacity-10 rounded">
+                            <i class="fas fa-ruler text-primary fs-4 mb-2"></i>
+                            <h6 class="text-primary mb-1">Perímetro</h6>
+                            <h5 class="mb-0">{{ result.perimeter }} m</h5>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="text-center p-3 bg-info bg-opacity-10 rounded">
+                            <i class="fas fa-dot-circle text-info fs-4 mb-2"></i>
+                            <h6 class="text-info mb-1">Vértices</h6>
+                            <h5 class="mb-0">{{ result.num_vertices }}</h5>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-4">
+                    <h6 class="mb-3">Coordenadas Processadas:</h6>
+                    <div class="bg-dark text-white rounded p-3" style="max-height: 200px; overflow-y: auto;">
+                        <table class="table table-sm mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Ponto</th>
+                                    <th>X</th>
+                                    <th>Y</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for coord in result.coordinates %}
+                                <tr>
+                                    <td>{{ loop.index }}</td>
+                                    <td>{{ "%.2f"|format(coord[0]) }}</td>
+                                    <td>{{ "%.2f"|format(coord[1]) }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="mt-4">
+                    <h6 class="mb-3">Conversões de Área:</h6>
+                    <div class="bg-dark text-white rounded p-3">
+                        <div class="row text-center">
+                            <div class="col-4">
+                                <small class="text-muted">Hectares</small><br>
+                                <strong>{{ "%.4f"|format(result.area / 10000) }} ha</strong>
+                            </div>
+                            <div class="col-4">
+                                <small class="text-muted">Alqueires</small><br>
+                                <strong>{{ "%.4f"|format(result.area / 24200) }} alq</strong>
+                            </div>
+                            <div class="col-4">
+                                <small class="text-muted">Km²</small><br>
+                                <strong>{{ "%.6f"|format(result.area / 1000000) }} km²</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="card border-0 shadow-sm">
+            <div class="card-body text-center text-muted">
+                <i class="fas fa-map fs-1 mb-3"></i>
+                <h5>Aguardando Coordenadas</h5>
+                <p>Digite as coordenadas do polígono e clique em "Calcular"</p>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Visualization Canvas -->
+        {% if result %}
+        <div class="card border-0 shadow-sm mt-4">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <i class="fas fa-eye me-2"></i>Visualização do Polígono
+                </h6>
+            </div>
+            <div class="card-body">
+                <canvas id="polygonCanvas" width="400" height="300" class="border rounded w-100"></canvas>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Theory Section -->
+<div class="row mt-5">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-graduation-cap me-2"></i>Fórmula de Shoelace (Gauss)
+                </h5>
+            </div>
+            <div class="card-body">
+                <p>
+                    A fórmula de Shoelace, também conhecida como fórmula de Gauss para área, 
+                    é utilizada para calcular a área de um polígono simples dados os vértices em coordenadas cartesianas.
+                </p>
+                
+                <div class="row">
+                    <div class="col-md-8">
+                        <h6>Fórmula:</h6>
+                        <div class="bg-dark text-white rounded p-3 text-center mb-3">
+                            <strong>A = ½|∑(xᵢyᵢ₊₁ - xᵢ₊₁yᵢ)|</strong>
+                        </div>
+                        
+                        <h6>Onde:</h6>
+                        <ul>
+                            <li>A = área do polígono</li>
+                            <li>(xᵢ, yᵢ) = coordenadas do vértice i</li>
+                            <li>A somatória percorre todos os vértices</li>
+                            <li>O último vértice se conecta ao primeiro</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="col-md-4">
+                        <h6>Aplicações:</h6>
+                        <ul class="list-unstyled">
+                            <li><i class="fas fa-check text-success me-2"></i>Levantamentos topográficos</li>
+                            <li><i class="fas fa-check text-success me-2"></i>Cálculo de lotes urbanos</li>
+                            <li><i class="fas fa-check text-success me-2"></i>Propriedades rurais</li>
+                            <li><i class="fas fa-check text-success me-2"></i>Áreas de corte/aterro</li>
+                            <li><i class="fas fa-check text-success me-2"></i>Projetos paisagísticos</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="alert alert-info mt-3">
+                    <i class="fas fa-info-circle me-2"></i>
+                    <strong>Observação:</strong> Esta fórmula funciona para polígonos simples (não auto-intersectantes). 
+                    Para polígonos complexos ou com furos, métodos mais avançados devem ser utilizados.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function fillExample() {
+    const exampleCoords = `0,0
+100,0
+100,50
+50,50
+50,25
+0,25`;
+    document.querySelector('textarea[name="coordinates"]').value = exampleCoords;
+}
+
+{% if result %}
+// Draw polygon visualization
+window.addEventListener('load', function() {
+    const canvas = document.getElementById('polygonCanvas');
+    const ctx = canvas.getContext('2d');
+    
+    // Coordinates from result
+    const coords = {{ result.coordinates | tojsonfilter }};
+    
+    if (coords.length > 2) {
+        // Find bounds for scaling
+        let minX = coords[0][0], maxX = coords[0][0];
+        let minY = coords[0][1], maxY = coords[0][1];
+        
+        coords.forEach(coord => {
+            minX = Math.min(minX, coord[0]);
+            maxX = Math.max(maxX, coord[0]);
+            minY = Math.min(minY, coord[1]);
+            maxY = Math.max(maxY, coord[1]);
+        });
+        
+        // Add padding
+        const padding = 20;
+        const scaleX = (canvas.width - 2 * padding) / (maxX - minX || 1);
+        const scaleY = (canvas.height - 2 * padding) / (maxY - minY || 1);
+        const scale = Math.min(scaleX, scaleY);
+        
+        // Center the polygon
+        const offsetX = (canvas.width - (maxX - minX) * scale) / 2 - minX * scale;
+        const offsetY = (canvas.height - (maxY - minY) * scale) / 2 - minY * scale;
+        
+        // Clear canvas
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        // Draw polygon
+        ctx.beginPath();
+        coords.forEach((coord, index) => {
+            const x = coord[0] * scale + offsetX;
+            const y = canvas.height - (coord[1] * scale + offsetY); // Flip Y axis
+            
+            if (index === 0) {
+                ctx.moveTo(x, y);
+            } else {
+                ctx.lineTo(x, y);
+            }
+        });
+        ctx.closePath();
+        
+        // Fill and stroke
+        ctx.fillStyle = 'rgba(220, 53, 69, 0.1)';
+        ctx.fill();
+        ctx.strokeStyle = '#dc3545';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        
+        // Draw points
+        coords.forEach((coord, index) => {
+            const x = coord[0] * scale + offsetX;
+            const y = canvas.height - (coord[1] * scale + offsetY);
+            
+            ctx.beginPath();
+            ctx.arc(x, y, 4, 0, 2 * Math.PI);
+            ctx.fillStyle = '#dc3545';
+            ctx.fill();
+            
+            // Label points
+            ctx.fillStyle = '#000';
+            ctx.font = '12px Arial';
+            ctx.fillText(index + 1, x + 6, y - 6);
+        });
+    }
+});
+{% endif %}
+</script>
+{% endblock %}

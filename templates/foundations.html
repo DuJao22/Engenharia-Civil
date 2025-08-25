@@ -1,0 +1,269 @@
+{% extends "base.html" %}
+
+{% block title %}Fundações - Sistema de Engenharia Civil{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h1>
+            <i class="fas fa-home me-2"></i>Fundações Rasas
+        </h1>
+        <p class="text-muted">Cálculo de capacidade de carga usando a teoria de Terzaghi</p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-6">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-warning text-dark">
+                <h5 class="mb-0">
+                    <i class="fas fa-mountain me-2"></i>Propriedades do Solo
+                </h5>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    {{ form.hidden_tag() }}
+                    
+                    <div class="mb-3">
+                        {{ form.name.label(class="form-label") }}
+                        {{ form.name(class="form-control" + (" is-invalid" if form.name.errors else "")) }}
+                        {% if form.name.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.name.errors %}{{ error }}{% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            {{ form.width.label(class="form-label") }}
+                            {{ form.width(class="form-control" + (" is-invalid" if form.width.errors else "")) }}
+                            {% if form.width.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.width.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            {{ form.depth.label(class="form-label") }}
+                            {{ form.depth(class="form-control" + (" is-invalid" if form.depth.errors else "")) }}
+                            {% if form.depth.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.depth.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            {{ form.cohesion.label(class="form-label") }}
+                            {{ form.cohesion(class="form-control" + (" is-invalid" if form.cohesion.errors else "")) }}
+                            {% if form.cohesion.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.cohesion.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            {{ form.friction_angle.label(class="form-label") }}
+                            {{ form.friction_angle(class="form-control" + (" is-invalid" if form.friction_angle.errors else "")) }}
+                            {% if form.friction_angle.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.friction_angle.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form.unit_weight.label(class="form-label") }}
+                        {{ form.unit_weight(class="form-control" + (" is-invalid" if form.unit_weight.errors else "")) }}
+                        {% if form.unit_weight.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.unit_weight.errors %}{{ error }}{% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="d-grid">
+                        {{ form.submit(class="btn btn-warning btn-lg text-dark") }}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-6">
+        {% if result %}
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-warning text-dark">
+                <h5 class="mb-0">
+                    <i class="fas fa-calculator me-2"></i>Capacidade de Carga
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-12">
+                        <div class="text-center p-4 bg-danger bg-opacity-10 rounded">
+                            <i class="fas fa-weight-hanging text-danger fs-2 mb-2"></i>
+                            <h6 class="text-danger mb-1">Capacidade Última</h6>
+                            <h2 class="mb-0 text-danger">{{ result.q_ultimate }} kPa</h2>
+                        </div>
+                    </div>
+                    
+                    <div class="col-12">
+                        <div class="text-center p-4 bg-success bg-opacity-10 rounded">
+                            <i class="fas fa-check-circle text-success fs-2 mb-2"></i>
+                            <h6 class="text-success mb-1">Capacidade Admissível</h6>
+                            <h2 class="mb-0 text-success">{{ result.q_allowable }} kPa</h2>
+                            <small class="text-muted">Fator de Segurança: {{ result.safety_factor }}</small>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-4">
+                        <div class="text-center p-3 bg-info bg-opacity-10 rounded">
+                            <h6 class="text-info mb-1">N<sub>c</sub></h6>
+                            <h5 class="mb-0">{{ result.Nc }}</h5>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-4">
+                        <div class="text-center p-3 bg-primary bg-opacity-10 rounded">
+                            <h6 class="text-primary mb-1">N<sub>q</sub></h6>
+                            <h5 class="mb-0">{{ result.Nq }}</h5>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-4">
+                        <div class="text-center p-3 bg-secondary bg-opacity-10 rounded">
+                            <h6 class="text-secondary mb-1">N<sub>γ</sub></h6>
+                            <h5 class="mb-0">{{ result.Ngamma }}</h5>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-4">
+                    <h6 class="mb-3">Equação de Terzaghi:</h6>
+                    <div class="bg-dark text-white rounded p-3">
+                        <p class="text-center mb-2">
+                            <strong>q<sub>ult</sub> = c·N<sub>c</sub> + γ·D<sub>f</sub>·N<sub>q</sub> + 0.5·γ·B·N<sub>γ</sub></strong>
+                        </p>
+                        <hr>
+                        <small class="text-muted">
+                            Onde:<br>
+                            • c = coesão do solo<br>
+                            • γ = peso específico do solo<br>
+                            • D<sub>f</sub> = profundidade da fundação<br>
+                            • B = largura da sapata<br>
+                            • N<sub>c</sub>, N<sub>q</sub>, N<sub>γ</sub> = fatores de capacidade de carga
+                        </small>
+                    </div>
+                </div>
+
+                {% if result.q_allowable < 100 %}
+                <div class="alert alert-warning mt-3">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <strong>Atenção:</strong> Capacidade admissível baixa. Considerar fundação profunda.
+                </div>
+                {% elif result.q_allowable > 500 %}
+                <div class="alert alert-success mt-3">
+                    <i class="fas fa-check-circle me-2"></i>
+                    <strong>Excelente:</strong> Solo com boa capacidade de suporte.
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% else %}
+        <div class="card border-0 shadow-sm">
+            <div class="card-body text-center text-muted">
+                <i class="fas fa-home fs-1 mb-3"></i>
+                <h5>Aguardando Análise</h5>
+                <p>Preencha as propriedades do solo e clique em "Calcular"</p>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Theory Section -->
+<div class="row mt-5">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-book me-2"></i>Teoria de Terzaghi para Fundações Rasas
+                </h5>
+            </div>
+            <div class="card-body">
+                <p>
+                    A teoria de Terzaghi (1943) é amplamente utilizada para o cálculo da capacidade 
+                    de carga de fundações rasas em solos homogêneos.
+                </p>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Hipóteses da Teoria:</h6>
+                        <ul>
+                            <li>Solo homogêneo e isotrópico</li>
+                            <li>Fundação rígida e rugosa</li>
+                            <li>Carregamento vertical centrado</li>
+                            <li>Base da fundação horizontal</li>
+                            <li>Ruptura por cisalhamento geral</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <h6>Valores Típicos de Solos:</h6>
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Solo</th>
+                                        <th>φ (°)</th>
+                                        <th>c (kPa)</th>
+                                        <th>γ (kN/m³)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>Areia fofa</td>
+                                        <td>30-35</td>
+                                        <td>0</td>
+                                        <td>16-18</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Areia compacta</td>
+                                        <td>35-40</td>
+                                        <td>0</td>
+                                        <td>18-20</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Argila mole</td>
+                                        <td>0-10</td>
+                                        <td>10-25</td>
+                                        <td>14-16</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Argila rija</td>
+                                        <td>15-25</td>
+                                        <td>50-100</td>
+                                        <td>18-20</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="alert alert-info mt-3">
+                    <i class="fas fa-lightbulb me-2"></i>
+                    <strong>Importante:</strong> Esta análise considera apenas a capacidade de carga. 
+                    Para projetos executivos, verificar também recalques, estabilidade global e 
+                    realizar investigação geotécnica completa.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

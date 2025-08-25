@@ -1,0 +1,45 @@
+Adicione ao sistema uma funcionalidade de Gestão de Projetos onde o usuário pode criar um novo projeto (com dados como cliente, endereço da obra, responsável técnico, prazo e orçamento). Dentro do projeto, deve haver a opção de fazer orçamentos detalhados: cálculo de quantitativos de materiais (cimento, areia, brita, aço, blocos, tubulações, etc.), aplicação automática de composições de custo (SINAPI/TCPO), geração de cronograma (CPM/PERT) e emissão de relatório em PDF.
+
+Cada projeto deve permitir salvar múltiplos orçamentos, versões diferentes e ter um histórico de revisões. O administrador (João Layon) poderá gerenciar todos os projetos cadastrados pelos usuários e acompanhar estatísticas. O design deve ser profissional, responsivo, com navegação simples entre os módulos de cálculo e o módulo de projetos/orçamentos.”
+
+🔹 Dicas práticas (como engenheiro civil experiente)
+
+Orçamentos inteligentes
+
+Permitir que o sistema já traga composições padrão (ex.: 1m³ de concreto fck25 → 350 kg cimento, 0,55 m³ areia, 0,9 m³ brita, 180 L água, 100 kg aço médio).
+
+Conectar com bases públicas (ex.: SINAPI) para sempre ter preços atualizados.
+
+Controle de versões
+
+Na prática, todo orçamento sofre revisões (projeto inicial, revisado, aprovado). O sistema precisa salvar versões com data e autor.
+
+Comparativo de orçamentos
+
+O engenheiro sempre precisa mostrar para o cliente opções (ex.: estrutura metálica vs. concreto armado). Uma tela de comparativo é ouro.
+
+Histórico e rastreabilidade
+
+Cada projeto deve armazenar: quem calculou, quando, parâmetros usados e resultado. Isso evita erros e dá segurança técnica.
+
+Relatórios profissionais
+
+O sistema deve exportar relatórios de cálculo e orçamento em PDF bem formatado, já com capa, logotipo e assinatura do engenheiro.
+
+Integração com cronograma
+
+Depois do orçamento, o próximo passo sempre é planejar prazo. Vale incluir:
+
+cálculo de caminho crítico (CPM),
+
+visualização em Gráfico de Gantt,
+
+possibilidade de vincular custo + prazo → curva S.
+
+Módulo de produtividade da obra
+
+Um engenheiro sênior gostaria de ver não só o cálculo, mas o acompanhamento da execução: quanto já foi gasto, quanto falta, produtividade da equipe.
+
+Biblioteca de projetos
+
+Usuários avançados vão querer guardar seus projetos no sistema como uma “biblioteca”, para poder clonar e adaptar em novas obras.

@@ -1,0 +1,245 @@
+{% extends "base.html" %}
+
+{% block title %}Novo Item - {{ budget.name }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0">
+                    <i class="fas fa-plus me-2"></i>Novo Item
+                    <small class="text-muted">- {{ budget.name }}</small>
+                </h4>
+            </div>
+            <div class="card-body">
+                <!-- Seletor de Composição SINAPI/TCPO -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h6 class="mb-0"><i class="fas fa-search me-2"></i>Buscar Composição SINAPI/TCPO</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <input type="text" class="form-control" id="sinapiSearch" placeholder="Digite o código SINAPI (ex: 92885) ou descrição">
+                            </div>
+                            <div class="col-md-4">
+                                <button type="button" class="btn btn-outline-primary w-100" onclick="searchSinapi()">
+                                    <i class="fas fa-search me-1"></i>Buscar
+                                </button>
+                            </div>
+                        </div>
+                        <div id="searchResult" class="mt-3"></div>
+                        
+                        <!-- Composições pré-definidas -->
+                        <div class="mt-3">
+                            <h6>Composições Populares:</h6>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <button type="button" class="btn btn-outline-secondary btn-sm w-100 mb-2" onclick="loadComposition('92885')">
+                                        Concreto FCK 25
+                                    </button>
+                                </div>
+                                <div class="col-md-4">
+                                    <button type="button" class="btn btn-outline-secondary btn-sm w-100 mb-2" onclick="loadComposition('87487')">
+                                        Alvenaria Bloco
+                                    </button>
+                                </div>
+                                <div class="col-md-4">
+                                    <button type="button" class="btn btn-outline-secondary btn-sm w-100 mb-2" onclick="loadComposition('87269')">
+                                        Piso Cerâmico
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Formulário do Item -->
+                <form method="POST" id="itemForm">
+                    {{ form.hidden_tag() }}
+                    
+                    <div class="mb-3">
+                        {{ form.description.label(class="form-label") }}
+                        {{ form.description(class="form-control") }}
+                        {% if form.description.errors %}
+                            <div class="text-danger small">{{ form.description.errors[0] }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                {{ form.quantity.label(class="form-label") }}
+                                {{ form.quantity(class="form-control", id="quantity", onchange="calculateTotal()") }}
+                                {% if form.quantity.errors %}
+                                    <div class="text-danger small">{{ form.quantity.errors[0] }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                {{ form.unit.label(class="form-label") }}
+                                {{ form.unit(class="form-select") }}
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                {{ form.unit_cost.label(class="form-label") }}
+                                <div class="input-group">
+                                    <span class="input-group-text">R$</span>
+                                    {{ form.unit_cost(class="form-control", id="unitCost", onchange="calculateTotal()") }}
+                                </div>
+                                {% if form.unit_cost.errors %}
+                                    <div class="text-danger small">{{ form.unit_cost.errors[0] }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                {{ form.category.label(class="form-label") }}
+                                {{ form.category(class="form-select") }}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Total Calculado</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">R$</span>
+                                    <input type="text" class="form-control" id="totalCost" readonly>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form.notes.label(class="form-label") }}
+                        {{ form.notes(class="form-control", rows="3") }}
+                    </div>
+
+                    <!-- Detalhamento da Composição -->
+                    <div id="compositionDetail" class="card mb-3" style="display: none;">
+                        <div class="card-header">
+                            <h6 class="mb-0"><i class="fas fa-cogs me-2"></i>Detalhamento da Composição</h6>
+                        </div>
+                        <div class="card-body">
+                            <div id="compositionContent"></div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                        <a href="{{ url_for('budget_detail', project_id=project.id, budget_id=budget.id) }}" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-1"></i>Voltar
+                        </a>
+                        {{ form.submit(class="btn btn-primary") }}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function calculateTotal() {
+    const quantity = parseFloat(document.getElementById('quantity').value) || 0;
+    const unitCost = parseFloat(document.getElementById('unitCost').value) || 0;
+    const total = quantity * unitCost;
+    document.getElementById('totalCost').value = total.toFixed(2);
+}
+
+function searchSinapi() {
+    const searchTerm = document.getElementById('sinapiSearch').value;
+    if (!searchTerm) return;
+    
+    // Simula busca SINAPI
+    fetch(`/api/sinapi/${searchTerm}`)
+        .then(response => response.json())
+        .then(data => {
+            const resultDiv = document.getElementById('searchResult');
+            if (data.found) {
+                resultDiv.innerHTML = `
+                    <div class="alert alert-success">
+                        <h6>Composição Encontrada:</h6>
+                        <strong>${data.data.description}</strong><br>
+                        Custo unitário: R$ ${data.data.total_unit_cost}/${data.data.unit}<br>
+                        <button class="btn btn-primary btn-sm mt-2" onclick="applyComposition('${JSON.stringify(data.data).replace(/"/g, '&quot;')}')">
+                            Usar esta composição
+                        </button>
+                    </div>
+                `;
+            } else {
+                resultDiv.innerHTML = `
+                    <div class="alert alert-warning">
+                        Composição não encontrada na base SINAPI/TCPO.
+                    </div>
+                `;
+            }
+        })
+        .catch(error => {
+            console.error('Erro na busca:', error);
+        });
+}
+
+function loadComposition(code) {
+    document.getElementById('sinapiSearch').value = code;
+    searchSinapi();
+}
+
+function applyComposition(compositionJson) {
+    const composition = JSON.parse(compositionJson.replace(/&quot;/g, '"'));
+    
+    document.getElementById('{{ form.description.id }}').value = composition.description;
+    document.getElementById('unitCost').value = composition.total_unit_cost;
+    
+    // Atualiza o select de unidade
+    const unitSelect = document.getElementById('{{ form.unit.id }}');
+    for (let option of unitSelect.options) {
+        if (option.value === composition.unit) {
+            option.selected = true;
+            break;
+        }
+    }
+    
+    // Mostra detalhamento
+    const detailDiv = document.getElementById('compositionDetail');
+    const contentDiv = document.getElementById('compositionContent');
+    
+    let detailHtml = `
+        <div class="row">
+            <div class="col-md-4">
+                <strong>Materiais:</strong> R$ ${composition.materials_cost}
+            </div>
+            <div class="col-md-4">
+                <strong>Mão de Obra:</strong> R$ ${composition.labor_cost}
+            </div>
+            <div class="col-md-4">
+                <strong>Equipamentos:</strong> R$ ${composition.equipment_cost}
+            </div>
+        </div>
+        <hr>
+        <strong>Materiais necessários:</strong>
+        <ul class="list-unstyled">
+    `;
+    
+    if (composition.breakdown) {
+        for (const [material, data] of Object.entries(composition.breakdown)) {
+            detailHtml += `<li>• ${data.quantity} ${data.unit} de ${material}</li>`;
+        }
+    }
+    
+    detailHtml += '</ul>';
+    contentDiv.innerHTML = detailHtml;
+    detailDiv.style.display = 'block';
+    
+    calculateTotal();
+}
+
+// Calcula total quando a página carrega
+document.addEventListener('DOMContentLoaded', function() {
+    calculateTotal();
+});
+</script>
+{% endblock %}

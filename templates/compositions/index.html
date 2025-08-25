@@ -1,0 +1,229 @@
+{% extends "base.html" %}
+
+{% block title %}Composições de Custo - Sistema de Engenharia Civil{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2><i class="fas fa-list-alt me-2"></i>Composições de Custo</h2>
+            <a href="{{ url_for('new_composition') }}" class="btn btn-primary">
+                <i class="fas fa-plus me-1"></i>Nova Composição
+            </a>
+        </div>
+
+        {% if compositions %}
+        <!-- Filtros -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <input type="text" class="form-control" id="searchComposition" placeholder="Buscar por descrição ou código...">
+                    </div>
+                    <div class="col-md-3">
+                        <select class="form-select" id="filterCategory">
+                            <option value="">Todas as categorias</option>
+                            <option value="estrutura">Estrutura</option>
+                            <option value="fundacao">Fundação</option>
+                            <option value="acabamento">Acabamento</option>
+                            <option value="instalacoes">Instalações</option>
+                            <option value="movimento_terra">Movimento de Terra</option>
+                            <option value="outros">Outros</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <select class="form-select" id="filterSource">
+                            <option value="">Todas as fontes</option>
+                            <option value="sinapi">SINAPI</option>
+                            <option value="tcpo">TCPO</option>
+                            <option value="custom">Personalizada</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <button class="btn btn-outline-primary w-100" onclick="filterCompositions()">
+                            <i class="fas fa-filter me-1"></i>Filtrar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Lista de Composições -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">{{ compositions|length }} composições cadastradas</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped" id="compositionsTable">
+                        <thead>
+                            <tr>
+                                <th>Código</th>
+                                <th>Descrição</th>
+                                <th>Categoria</th>
+                                <th>Unidade</th>
+                                <th>Custo Unitário</th>
+                                <th>Produtividade</th>
+                                <th>Atualização</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for comp in compositions %}
+                            <tr data-category="{{ comp.category or '' }}" 
+                                data-description="{{ comp.description.lower() }}"
+                                data-source="{% if comp.sinapi_code %}sinapi{% elif comp.tcpo_code %}tcpo{% else %}custom{% endif %}">
+                                <td>
+                                    {% if comp.sinapi_code %}
+                                        <span class="badge bg-primary">SINAPI {{ comp.sinapi_code }}</span>
+                                    {% elif comp.tcpo_code %}
+                                        <span class="badge bg-info">TCPO {{ comp.tcpo_code }}</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">Personalizada</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <strong>{{ comp.description }}</strong>
+                                </td>
+                                <td>
+                                    <span class="badge bg-secondary">{{ comp.category.title() if comp.category else 'N/A' }}</span>
+                                </td>
+                                <td>{{ comp.unit }}</td>
+                                <td class="fw-bold">R$ {{ "%.2f"|format(comp.unit_cost) }}</td>
+                                <td>
+                                    {% if comp.productivity %}
+                                        {{ "%.2f"|format(comp.productivity) }} h/{{ comp.unit }}
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </td>
+                                <td>{{ comp.last_updated.strftime('%d/%m/%Y') }}</td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <button class="btn btn-outline-primary btn-sm" onclick="viewComposition({{ comp.id }})" title="Ver detalhes">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <button class="btn btn-outline-success btn-sm" onclick="useComposition({{ comp.id }})" title="Usar em orçamento">
+                                            <i class="fas fa-plus"></i>
+                                        </button>
+                                        <button class="btn btn-outline-warning btn-sm" onclick="editComposition({{ comp.id }})" title="Editar">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+            <div class="mb-4">
+                <i class="fas fa-list-alt fa-4x text-muted"></i>
+            </div>
+            <h4 class="text-muted">Nenhuma composição cadastrada</h4>
+            <p class="text-muted">Cadastre composições de custo baseadas em SINAPI/TCPO para agilizar seus orçamentos.</p>
+            <a href="{{ url_for('new_composition') }}" class="btn btn-primary">
+                <i class="fas fa-plus me-1"></i>Cadastrar Primeira Composição
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Modal para detalhes da composição -->
+<div class="modal fade" id="compositionModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Detalhes da Composição</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="compositionModalBody">
+                <!-- Conteúdo carregado via JavaScript -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                <button type="button" class="btn btn-primary" onclick="useCompositionFromModal()">Usar em Orçamento</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let currentCompositionId = null;
+
+function filterCompositions() {
+    const searchTerm = document.getElementById('searchComposition').value.toLowerCase();
+    const categoryFilter = document.getElementById('filterCategory').value;
+    const sourceFilter = document.getElementById('filterSource').value;
+    const rows = document.querySelectorAll('#compositionsTable tbody tr');
+    
+    rows.forEach(row => {
+        const description = row.getAttribute('data-description');
+        const category = row.getAttribute('data-category');
+        const source = row.getAttribute('data-source');
+        
+        const matchesSearch = !searchTerm || description.includes(searchTerm);
+        const matchesCategory = !categoryFilter || category === categoryFilter;
+        const matchesSource = !sourceFilter || source === sourceFilter;
+        
+        row.style.display = (matchesSearch && matchesCategory && matchesSource) ? '' : 'none';
+    });
+}
+
+function viewComposition(compositionId) {
+    currentCompositionId = compositionId;
+    
+    fetch(`/api/compositions/${compositionId}`)
+        .then(response => response.json())
+        .then(data => {
+            const modalBody = document.getElementById('compositionModalBody');
+            modalBody.innerHTML = `
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Informações Básicas</h6>
+                        <p><strong>Descrição:</strong> ${data.description}</p>
+                        <p><strong>Unidade:</strong> ${data.unit}</p>
+                        <p><strong>Custo Unitário:</strong> R$ ${data.unit_cost.toFixed(2)}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Composição de Custos</h6>
+                        <p><strong>Materiais:</strong> R$ ${data.materials_cost.toFixed(2)}</p>
+                        <p><strong>Mão de Obra:</strong> R$ ${data.labor_cost.toFixed(2)}</p>
+                        <p><strong>Equipamentos:</strong> R$ ${data.equipment_cost.toFixed(2)}</p>
+                    </div>
+                </div>
+            `;
+            
+            const modal = new bootstrap.Modal(document.getElementById('compositionModal'));
+            modal.show();
+        })
+        .catch(error => {
+            console.error('Erro ao carregar composição:', error);
+            alert('Erro ao carregar detalhes da composição');
+        });
+}
+
+function useComposition(compositionId) {
+    alert(`Funcionalidade para usar composição ${compositionId} em orçamento em desenvolvimento`);
+}
+
+function useCompositionFromModal() {
+    if (currentCompositionId) {
+        useComposition(currentCompositionId);
+    }
+}
+
+function editComposition(compositionId) {
+    alert('Funcionalidade de edição em desenvolvimento');
+}
+
+// Filtro em tempo real
+document.getElementById('searchComposition').addEventListener('input', filterCompositions);
+document.getElementById('filterCategory').addEventListener('change', filterCompositions);
+document.getElementById('filterSource').addEventListener('change', filterCompositions);
+</script>
+{% endblock %}

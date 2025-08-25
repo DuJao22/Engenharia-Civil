@@ -1,0 +1,182 @@
+{% extends "base.html" %}
+
+{% block title %}Análise Estrutural - Sistema de Engenharia Civil{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h1>
+            <i class="fas fa-bridge me-2"></i>Análise Estrutural
+        </h1>
+        <p class="text-muted">Cálculo de momentos fletores e esforços cortantes em vigas</p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-6">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-calculator me-2"></i>Dados de Entrada
+                </h5>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    {{ form.hidden_tag() }}
+                    
+                    <div class="mb-3">
+                        {{ form.name.label(class="form-label") }}
+                        {{ form.name(class="form-control" + (" is-invalid" if form.name.errors else "")) }}
+                        {% if form.name.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.name.errors %}{{ error }}{% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            {{ form.length.label(class="form-label") }}
+                            {{ form.length(class="form-control" + (" is-invalid" if form.length.errors else "")) }}
+                            {% if form.length.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.length.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            {{ form.load_type.label(class="form-label") }}
+                            {{ form.load_type(class="form-select" + (" is-invalid" if form.load_type.errors else "")) }}
+                            {% if form.load_type.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.load_type.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-8 mb-3">
+                            {{ form.load_value.label(class="form-label") }}
+                            {{ form.load_value(class="form-control" + (" is-invalid" if form.load_value.errors else "")) }}
+                            {% if form.load_value.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.load_value.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            {{ form.load_unit.label(class="form-label") }}
+                            {{ form.load_unit(class="form-select" + (" is-invalid" if form.load_unit.errors else "")) }}
+                        </div>
+                    </div>
+
+                    <div class="d-grid">
+                        {{ form.submit(class="btn btn-primary btn-lg") }}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-6">
+        {% if result %}
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-chart-line me-2"></i>Resultados
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-12">
+                        <div class="bg-black rounded p-3">
+                            <h6 class="text-primary mb-2">
+                                <i class="fas fa-info-circle me-1"></i>Dados de Entrada
+                            </h6>
+                            <ul class="list-unstyled mb-0 small">
+                                <li><strong>Comprimento:</strong> {{ result.length }} m</li>
+                                <li><strong>Carregamento:</strong> {{ result.load_value }} 
+                                    {% if result.load_type == 'uniform' %}kN/m{% else %}kN{% endif %}</li>
+                                <li><strong>Tipo:</strong> 
+                                    {% if result.load_type == 'uniform' %}Distribuída{% else %}Pontual no centro{% endif %}
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="text-center p-3 bg-primary bg-opacity-10 rounded">
+                            <i class="fas fa-arrows-alt-h text-primary fs-3 mb-2"></i>
+                            <h6 class="text-primary mb-1">Momento Máximo</h6>
+                            <h4 class="mb-0">{{ result.moment_max }} kN.m</h4>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="text-center p-3 bg-info bg-opacity-10 rounded">
+                            <i class="fas fa-cut text-info fs-3 mb-2"></i>
+                            <h6 class="text-info mb-1">Cortante Máximo</h6>
+                            <h4 class="mb-0">{{ result.shear_max }} kN</h4>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-4">
+                    <h6 class="mb-3">Fórmulas Utilizadas:</h6>
+                    <div class="bg-dark text-white rounded p-3">
+                        {% if result.load_type == 'uniform' %}
+                        <p class="mb-2"><strong>Carga Uniformemente Distribuída:</strong></p>
+                        <ul class="list-unstyled small text-muted mb-0">
+                            <li>M<sub>máx</sub> = wL²/8</li>
+                            <li>V<sub>máx</sub> = wL/2</li>
+                        </ul>
+                        {% else %}
+                        <p class="mb-2"><strong>Carga Pontual no Centro:</strong></p>
+                        <ul class="list-unstyled small text-muted mb-0">
+                            <li>M<sub>máx</sub> = PL/4</li>
+                            <li>V<sub>máx</sub> = P/2</li>
+                        </ul>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="card border-0 shadow-sm">
+            <div class="card-body text-center text-muted">
+                <i class="fas fa-chart-line fs-1 mb-3"></i>
+                <h5>Aguardando Cálculo</h5>
+                <p>Preencha os dados ao lado e clique em "Calcular"</p>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Theory Section -->
+<div class="row mt-5">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-book me-2"></i>Fundamentação Teórica
+                </h5>
+            </div>
+            <div class="card-body">
+                <p>
+                    Este módulo calcula os esforços internos em vigas simplesmente apoiadas submetidas 
+                    a carregamentos uniformemente distribuídos ou cargas pontuais concentradas.
+                </p>
+                <h6>Hipóteses Adotadas:</h6>
+                <ul>
+                    <li>Viga simplesmente apoiada (isostática)</li>
+                    <li>Material com comportamento elástico linear</li>
+                    <li>Seções transversais planas permanecem planas</li>
+                    <li>Carregamento aplicado no plano de flexão</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

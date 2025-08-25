@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+
+{% block title %}Nova Composição - Sistema de Engenharia Civil{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0"><i class="fas fa-list-alt me-2"></i>Nova Composição de Custo</h4>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    {{ form.hidden_tag() }}
+                    
+                    <!-- Códigos -->
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                {{ form.sinapi_code.label(class="form-label") }}
+                                {{ form.sinapi_code(class="form-control", placeholder="Ex: 92885") }}
+                                {% if form.sinapi_code.errors %}
+                                    <div class="text-danger small">{{ form.sinapi_code.errors[0] }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                {{ form.tcpo_code.label(class="form-label") }}
+                                {{ form.tcpo_code(class="form-control", placeholder="Ex: 04.001.001") }}
+                                {% if form.tcpo_code.errors %}
+                                    <div class="text-danger small">{{ form.tcpo_code.errors[0] }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Descrição -->
+                    <div class="mb-3">
+                        {{ form.description.label(class="form-label") }}
+                        {{ form.description(class="form-control", placeholder="Ex: Concreto FCK 25 MPa, com brita 1 e 2, slump 8±1cm") }}
+                        {% if form.description.errors %}
+                            <div class="text-danger small">{{ form.description.errors[0] }}</div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Categoria e Unidade -->
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                {{ form.category.label(class="form-label") }}
+                                {{ form.category(class="form-select") }}
+                                {% if form.category.errors %}
+                                    <div class="text-danger small">{{ form.category.errors[0] }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                {{ form.unit.label(class="form-label") }}
+                                {{ form.unit(class="form-select") }}
+                                {% if form.unit.errors %}
+                                    <div class="text-danger small">{{ form.unit.errors[0] }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Custo e Produtividade -->
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                {{ form.unit_cost.label(class="form-label") }}
+                                <div class="input-group">
+                                    <span class="input-group-text">R$</span>
+                                    {{ form.unit_cost(class="form-control", placeholder="0.00") }}
+                                </div>
+                                {% if form.unit_cost.errors %}
+                                    <div class="text-danger small">{{ form.unit_cost.errors[0] }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                {{ form.productivity.label(class="form-label") }}
+                                <div class="input-group">
+                                    {{ form.productivity(class="form-control", placeholder="0.00") }}
+                                    <span class="input-group-text">h/un</span>
+                                </div>
+                                {% if form.productivity.errors %}
+                                    <div class="text-danger small">{{ form.productivity.errors[0] }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>Dica:</strong> As composições de custo baseadas no SINAPI ou TCPO facilitam a criação de orçamentos mais precisos e padronizados.
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                        <a href="{{ url_for('compositions') }}" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-1"></i>Voltar
+                        </a>
+                        {{ form.submit(class="btn btn-primary") }}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
